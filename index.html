@@ -1,78 +1,133 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Late for the Train — Static Arrivals</title>
-  <link rel="stylesheet" href="./assets/arrivals.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joshua Seek | Analytics Engineer</title>
+    <link rel="stylesheet" href="styles.css">
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GCMFJBGWVS"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-GCMFJBGWVS');
+</script>
+
 </head>
 <body>
-  <main class="screen" id="screen">
-    <header class="top-bar">
-      <div>
-        <h1>Late for the Train</h1>
-        <div class="subtitle">Next arrival at <span id="station-code">FLG</span></div>
-      </div>
-      <div class="controls">
-        <label class="control">
-          Display
-          <select id="display-select">
-            <option value="cards">Cards</option>
-            <option value="split">Split-flap</option>
-          </select>
-        </label>
-        <label class="control">
-          Station
-          <input id="station-input" maxlength="4" placeholder="FLG" />
-        </label>
-        <button id="apply-station" class="button">Update</button>
-        <button id="toggle-night" class="button">Night mode</button>
-        <button id="toggle-controls" class="button button-ghost">Hide controls</button>
-      </div>
+    <header>
+        <h1>Joshua Seek</h1>
     </header>
-
-    <button id="show-controls" class="button button-ghost floating-controls is-hidden">
-      Show controls
-    </button>
-
-    <section class="hero" id="hero-section" aria-live="polite">
-      <div class="hero-card">
-        <div class="hero-label">Next arrival</div>
-        <div class="hero-main" id="next-time">--</div>
-        <div class="hero-detail" id="next-route">Loading...</div>
-        <div class="hero-sub" id="next-status"></div>
-      </div>
-      <div class="hero-meta">
-        <div id="next-origin"></div>
-        <div id="next-destination"></div>
-        <div id="next-source"></div>
-      </div>
+    <p>Senior Analytics Engineer | Community Advocate | Data Enthusiast</p>
+    <section>
+        <h2>About Me</h2>
+        <p>I am an analytics engineer based in Tacoma, Washington, with a strong passion for data, technology, and community engagement. I specialize in developing scalable data solutions and enhancing marketing analytics to drive informed decision-making. Beyond my professional work, I actively contribute to my community through initiatives such as Safe Streets and local political campaigns.</p>
     </section>
-
-    <section class="upcoming" id="upcoming-section">
-      <h2>Upcoming arrivals</h2>
-      <div id="upcoming-list" class="upcoming-list"></div>
+    <section>
+        <h2>Resume</h2>
+        <p><strong><a href="https://www.linkedin.com/in/joshuaseek/">Check out my LinkedIn</a></strong></p>
     </section>
-
-    <section class="split-flap is-hidden" id="split-section" aria-live="polite">
-      <h2>Arrivals</h2>
-      <div id="split-list" class="split-list"></div>
+    <section>
+        <h2>Skills & Tools</h2>
+        <p>I have experience with a wide array of tools across analytics engineering, marketing, customer excellence, GTM, and product support.</p>
+        <p></p>
+        <h3>Modern Data Stack</h3>
+        <div class="tools-container">
+            <div class="tool">
+                <img src="images/sql.png" alt="SQL Logo">
+            </div>
+            <div class="tool">
+                <img src="images/python.jpg" alt="Python Logo">
+            </div>
+            <div class="tool">
+                <img src="images/dbt.jpg" alt="dbt Logo">
+            </div>
+            <div class="tool">
+                <img src="images/snowflake.png" alt="Snowflake Logo">
+            </div>
+            <div class="tool">
+                <img src="images/fivetran.png" alt="Fivetran Logo">
+            </div>
+            <div class="tool">
+                <img src="images/airflow.png" alt="Airflow Logo">
+            </div>
+            <div class="tool">
+                <img src="images/census.png" alt="Census Logo">
+            </div>
+        </div>
+        <h3>Visualization</h3>
+        <div class="tools-container">
+            <div class="tool">
+                <img src="images/looker.png" alt="Looker Logo">
+            </div>
+            <div class="tool">
+                <img src="images/powerbi.png" alt="Power BI Logo">
+            </div>
+            <div class="tool">
+                <img src="images/mode.png" alt="Mode Logo">
+            </div>
+            <div class="tool">
+                <img src="images/hex.png" alt="Hex Logo">
+            </div>
+            <div class="tool">
+                <img src="images/streamlit.png" alt="StreamLit Logo">
+            </div>
+        </div>
+        <h3>Marketing/CDP</h3>
+        <div class="tools-container">
+            <div class="tool">
+                <img src="images/salesforce.png" alt="Salesforce Logo">
+            </div>
+            <div class="tool">
+                <img src="images/braze.png" alt="Braze Logo">
+            </div>
+            <div class="tool">
+                <img src="images/googleads.png" alt="Google Ads Logo">
+            </div>
+            <div class="tool">
+                <img src="images/googleanalytics.png" alt="Google Analytics Logo">
+            </div>
+            <div class="tool">
+                <img src="images/facebookads.png" alt="Facebook Ads Logo">
+            </div>
+        </div>
+        <h3>Version Control</h3>
+        <div class="tools-container">
+            <div class="tool">
+                <img src="images/git.png" alt="Git Logo">
+            </div>
+            <div class="tool">
+                <img src="images/azuredevops.png" alt="Azure DevOps Logo">
+            </div>
+        </div>
     </section>
-
-    <footer class="footer">
-      <div class="footer-row">
-        <div id="refresh-time">Last updated: --</div>
-        <div id="stale-indicator" class="stale"></div>
-      </div>
-      <p class="data-note">
-        Data source: <strong>api-v3.amtraker.com</strong> (unofficial). Browsers may block direct requests due to
-        CORS. If that happens, point this page at a lightweight proxy instead (example URLs:
-        <code>https://your-worker.example.com/v3/trains</code> for a Cloudflare Worker or
-        <code>/.netlify/functions/amtraker?path=/v3/trains</code> for a Netlify Function).
-      </p>
+    <section id="projects">
+        <h2>Interesting Projects</h2>
+        <div class="project">
+            <img src="images/tacoma311heatmap.png" alt="Tacoma 311 Dashboard">
+            <div class="project-text">
+                <h3>Tacoma 311 Issues Dashboard</h3>
+                <p>Observing delays in the city's response to community issues, I sought to analyze available data on Tacoma's 311 activity. This exploration provided valuable insights into the city's challenges, highlighting areas that face greater difficulties, receive less attention, and experience higher levels of strain. Leveraging this data has allowed me to engage in more informed discussions and advocate more effectively for community needs.</p>
+                <a href="https://tacoma311data.streamlit.app/" target="_blank" class="button">See the Dashboard</a>
+                <a href="https://github.com/jseek/seeclickfix_tacoma_data" target="_blank" class="button">Download the repo and play with the data yourself</a>
+            </div>
+        </div>
+        <div class="project">
+            <img src="images/header-bg.jpg" alt="Late for the Train arrivals display">
+            <div class="project-text">
+                <h3>Late for the Train</h3>
+                <p>A client-side split-flap arrivals board built on Amtraker data, with station selection and card or split display modes.</p>
+                <a href="late-for-the-train.html" class="button">Open the Arrivals Board</a>
+            </div>
+        </div>
+    </section> 
+    <section>
+    </section>
+    <footer>
+        <p><a href="https://dot.cards/def6e38e-b598-409e-b2dd-3b457f3cd3b2" style="color:white;">Contact Me</a></p>
     </footer>
-  </main>
-
-  <script src="./assets/arrivals.js"></script>
 </body>
 </html>
