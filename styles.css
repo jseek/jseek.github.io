@@ -159,3 +159,48 @@ li {
         max-width: 100%; /* Prevents image overflow */
     }
 }
+
+/* Arrivals board (card style) */
+.arrivals-board {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    align-items: stretch;
+}
+
+.arrivals-board .arrival-card {
+    background: #f7f9fb;
+    border: 1px solid #e3e8ef;
+    border-radius: 10px;
+    padding: 16px;
+    text-align: left;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+
+.arrivals-board .arrival-card h4 {
+    margin: 0 0 8px;
+    color: #2c3e50;
+}
+
+.arrivals-board .arrival-card .arrival-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    font-size: 0.95em;
+    color: #5a6b7b;
+}
+
+@media screen and (max-width: 600px) {
+    .arrivals-board {
+        grid-template-columns: 1fr;
+    }
+
+    .arrivals-board .arrival-card {
+        padding: 14px;
+    }
+
+    .arrivals-board .arrival-card .arrival-meta {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
