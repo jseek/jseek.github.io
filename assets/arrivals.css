@@ -249,8 +249,11 @@ body {
 }
 
 .upcoming-card .train-map {
+  display: block;
+  width: 100%;
   grid-column: 1 / -1;
   height: 220px;
+  min-height: 220px;
   border-radius: 16px;
   overflow: hidden;
   border: 1px solid var(--card-border);
