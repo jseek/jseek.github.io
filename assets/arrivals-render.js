@@ -128,6 +128,80 @@ export function initArrivalsRenderer(elements) {
     staleIndicatorEl,
   } = elements;
   const flapTimers = new WeakMap();
+  const mapInstances = new Set();
+  let nightMode = document.body.classList.contains("night");
+
+  function createTileLayer(isNight) {
+    if (isNight) {
+      return L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
+      });
+    }
+    return L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    });
+  }
+
+  function teardownMaps() {
+    mapInstances.forEach((entry) => {
+      entry.map.remove();
+    });
+    mapInstances.clear();
+  }
+
+  function formatMapLabel(text) {
+    return String(text || "").trim() || "N/A";
+  }
+
+  function renderMapFallback(mapEl) {
+    mapEl.classList.add("map-unavailable");
+    mapEl.textContent = "Map unavailable for this train.";
+    mapEl.dataset.mapReady = "true";
+  }
+
+  function initMap(mapEl, train) {
+    if (!window.L) {
+      renderMapFallback(mapEl);
+      return;
+    }
+    if (!train?.trainLocation || !train?.stationLocation) {
+      renderMapFallback(mapEl);
+      return;
+    }
+    const trainLabel = formatMapLabel(train.trainNum);
+    const stationLabel = formatMapLabel(train.station_code || train.destination?.code);
+    const trainCoords = [train.trainLocation.lat, train.trainLocation.lon];
+    const stationCoords = [train.stationLocation.lat, train.stationLocation.lon];
+    const map = L.map(mapEl, {
+      zoomControl: false,
+      attributionControl: false,
+      dragging: false,
+      doubleClickZoom: false,
+      scrollWheelZoom: false,
+      boxZoom: false,
+      keyboard: false,
+      tap: false,
+    });
+    const tileLayer = createTileLayer(nightMode).addTo(map);
+    L.marker(trainCoords, {
+      icon: L.divIcon({
+        className: "map-label map-label-train",
+        html: trainLabel,
+      }),
+      interactive: false,
+    }).addTo(map);
+    L.marker(stationCoords, {
+      icon: L.divIcon({
+        className: "map-label map-label-station",
+        html: stationLabel,
+      }),
+      interactive: false,
+    }).addTo(map);
+    const bounds = L.latLngBounds([trainCoords, stationCoords]).pad(0.2);
+    map.fitBounds(bounds, { animate: false });
+    mapInstances.add({ map, tileLayer });
+    mapEl.dataset.mapReady = "true";
+  }
 
   function animateCellTo(cell, targetChar, force) {
     const normalizedTarget = normalizeFlapChar(targetChar);
@@ -256,6 +330,7 @@ export function initArrivalsRenderer(elements) {
     if (!upcomingListEl) {
       return;
     }
+    teardownMaps();
     upcomingListEl.innerHTML = "";
     if (!trains.length) {
       upcomingListEl.innerHTML = '<div class="upcoming-card">No upcoming arrivals found.</div>';
@@ -300,10 +375,25 @@ export function initArrivalsRenderer(elements) {
         <div><span>Destination</span><strong>${destinationName}</strong></div>
       `;
 
+      const mapEl = document.createElement("div");
+      mapEl.className = "train-map";
+      mapEl.setAttribute("aria-hidden", "true");
+      details.appendChild(mapEl);
+
+      const mapAttribution = document.createElement("div");
+      mapAttribution.className = "map-attribution";
+      mapAttribution.textContent = "Map tiles © OpenStreetMap contributors; dark tiles © CARTO.";
+      details.appendChild(mapAttribution);
+
       card.addEventListener("click", () => {
         const isExpanded = card.classList.toggle("is-expanded");
         card.setAttribute("aria-expanded", String(isExpanded));
         indicator.textContent = isExpanded ? "Hide details" : "Details";
+        if (isExpanded && !mapEl.dataset.mapReady) {
+          requestAnimationFrame(() => {
+            initMap(mapEl, train);
+          });
+        }
       });
 
       card.appendChild(eta);
@@ -362,6 +452,14 @@ export function initArrivalsRenderer(elements) {
     stationCodeEl.textContent = value;
   }
 
+  function setNightMode(enabled) {
+    nightMode = enabled;
+    mapInstances.forEach((entry) => {
+      entry.map.removeLayer(entry.tileLayer);
+      entry.tileLayer = createTileLayer(nightMode).addTo(entry.map);
+    });
+  }
+
   return {
     renderHero,
     renderUpcoming,
@@ -369,5 +467,6 @@ export function initArrivalsRenderer(elements) {
     renderRefreshTime,
     renderStale,
     setStationCode,
+    setNightMode,
   };
 }

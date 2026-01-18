@@ -49,6 +49,7 @@ if (!["cards", "split"].includes(displayType)) {
 function applyNightMode(enabled) {
   document.body.classList.toggle("night", enabled);
   toggleNightBtn.textContent = enabled ? "Day mode" : "Night mode";
+  renderer.setNightMode(enabled);
 }
 
 function applyDisplayType(value) {

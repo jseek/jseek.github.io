@@ -248,6 +248,46 @@ body {
   font-size: 1rem;
 }
 
+.upcoming-card .train-map {
+  grid-column: 1 / -1;
+  height: 220px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+  margin-top: 8px;
+}
+
+.upcoming-card .train-map.map-unavailable {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  color: var(--muted);
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.map-label {
+  background: var(--card);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border: 2px solid var(--accent);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.map-label-station {
+  border-color: var(--warning);
+}
+
+.map-attribution {
+  grid-column: 1 / -1;
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-top: -4px;
+}
+
 .upcoming-card.is-expanded .train-details {
   display: grid;
 }
