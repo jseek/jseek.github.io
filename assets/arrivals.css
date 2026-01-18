@@ -6,6 +6,7 @@
   --muted: #404040;
   --accent: #0057b8;
   --warning: #b0231c;
+  --card-border: rgba(0, 0, 0, 0.08);
   --flap-bg: #1a1a1a;
   --flap-fg: #f5f2e9;
   --flap-border: rgba(255, 255, 255, 0.12);
@@ -19,6 +20,7 @@ body.night {
   --muted: #b5b5b5;
   --accent: #4da3ff;
   --warning: #ff6a6a;
+  --card-border: rgba(255, 255, 255, 0.08);
   --flap-bg: #0c0c0c;
   --flap-fg: #f2f2f2;
   --flap-border: rgba(255, 255, 255, 0.08);
@@ -188,13 +190,66 @@ body {
 }
 
 .upcoming-card {
+  border: 1px solid transparent;
   display: grid;
   grid-template-columns: 120px 1fr 120px;
+  grid-template-rows: auto auto;
   gap: 16px;
   align-items: center;
   background: var(--card);
   padding: 20px 24px;
   border-radius: 18px;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.upcoming-card:hover,
+.upcoming-card:focus-visible {
+  border-color: rgba(0, 87, 184, 0.4);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  outline: none;
+}
+
+.upcoming-card .expand-indicator {
+  justify-self: end;
+  font-size: 0.85rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.upcoming-card .train-details {
+  display: none;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  padding-top: 8px;
+  border-top: 1px solid var(--card-border);
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.upcoming-card .train-details div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.upcoming-card .train-details span {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+}
+
+.upcoming-card .train-details strong {
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.upcoming-card.is-expanded .train-details {
+  display: grid;
 }
 
 .upcoming-card .eta {

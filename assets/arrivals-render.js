@@ -262,9 +262,13 @@ export function initArrivalsRenderer(elements) {
       return;
     }
 
-    trains.forEach((train) => {
-      const card = document.createElement("div");
+    trains.forEach((train, index) => {
+      const card = document.createElement("button");
+      card.type = "button";
       card.className = "upcoming-card";
+      card.setAttribute("aria-expanded", "false");
+      const detailsId = `train-details-${index}`;
+      card.setAttribute("aria-controls", detailsId);
 
       const eta = document.createElement("div");
       eta.className = "eta";
@@ -278,9 +282,32 @@ export function initArrivalsRenderer(elements) {
       origin.className = "source";
       origin.textContent = `${train.origin.name || ""} → ${train.destination.name || ""}`.trim();
 
+      const indicator = document.createElement("div");
+      indicator.className = "expand-indicator";
+      indicator.textContent = "Details";
+
+      const details = document.createElement("div");
+      details.className = "train-details";
+      details.id = detailsId;
+      details.innerHTML = `
+        <div><span>Train</span><strong>${train.trainNum || "N/A"}</strong></div>
+        <div><span>Status</span><strong>${train.statusMsg || "On time"}</strong></div>
+        <div><span>Origin</span><strong>${train.origin.name || train.origin.code || "Unknown"}</strong></div>
+        <div><span>Destination</span><strong>${train.destination.name || train.destination.code || "Unknown"}</strong></div>
+        <div><span>Arrival</span><strong>${formatTime(train.arrivalTime)}</strong></div>
+        <div><span>Source</span><strong>${train.timeSource || "unknown"}</strong></div>
+      `;
+
+      card.addEventListener("click", () => {
+        const isExpanded = card.classList.toggle("is-expanded");
+        card.setAttribute("aria-expanded", String(isExpanded));
+      });
+
       card.appendChild(eta);
       card.appendChild(route);
       card.appendChild(origin);
+      card.appendChild(indicator);
+      card.appendChild(details);
       upcomingListEl.appendChild(card);
     });
   }
