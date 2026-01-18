@@ -164,14 +164,19 @@ export function initArrivalsRenderer(elements) {
       renderMapFallback(mapEl, "Map unavailable: map library failed to load.");
       return;
     }
-    if (!train?.trainLocation || !train?.stationLocation) {
-      renderMapFallback(mapEl, "Map unavailable: missing location data.");
+    if (!train?.trainLocation) {
+      renderMapFallback(mapEl, "Map unavailable: missing train location data.");
       return;
     }
     const trainLabel = formatMapLabel(train.trainNum);
-    const stationLabel = formatMapLabel(train.station_code || train.destination?.code);
     const trainCoords = [train.trainLocation.lat, train.trainLocation.lon];
-    const stationCoords = [train.stationLocation.lat, train.stationLocation.lon];
+    const hasStationLocation = Boolean(train.stationLocation);
+    const stationCoords = hasStationLocation
+      ? [train.stationLocation.lat, train.stationLocation.lon]
+      : null;
+    const stationLabel = hasStationLocation
+      ? formatMapLabel(train.station_code || train.destination?.code)
+      : null;
     const map = L.map(mapEl, {
       zoomControl: false,
       attributionControl: false,
@@ -190,15 +195,19 @@ export function initArrivalsRenderer(elements) {
       }),
       interactive: false,
     }).addTo(map);
-    L.marker(stationCoords, {
-      icon: L.divIcon({
-        className: "map-label map-label-station",
-        html: stationLabel,
-      }),
-      interactive: false,
-    }).addTo(map);
-    const bounds = L.latLngBounds([trainCoords, stationCoords]).pad(0.2);
-    map.fitBounds(bounds, { animate: false });
+    if (hasStationLocation && stationCoords) {
+      L.marker(stationCoords, {
+        icon: L.divIcon({
+          className: "map-label map-label-station",
+          html: stationLabel,
+        }),
+        interactive: false,
+      }).addTo(map);
+      const bounds = L.latLngBounds([trainCoords, stationCoords]).pad(0.2);
+      map.fitBounds(bounds, { animate: false });
+    } else {
+      map.setView(trainCoords, 7, { animate: false });
+    }
     mapInstances.add({ map, tileLayer });
     mapEl.dataset.mapReady = "true";
   }
