@@ -286,21 +286,24 @@ export function initArrivalsRenderer(elements) {
       indicator.className = "expand-indicator";
       indicator.textContent = "Details";
 
+      const trainName = `${train.routeName || "Train"} ${train.trainNum || ""}`.trim();
+      const originName = train.origin.name || train.origin.code || "Unknown";
+      const destinationName = train.destination.name || train.destination.code || "Unknown";
+
       const details = document.createElement("div");
       details.className = "train-details";
       details.id = detailsId;
       details.innerHTML = `
-        <div><span>Train</span><strong>${train.trainNum || "N/A"}</strong></div>
-        <div><span>Status</span><strong>${train.statusMsg || "On time"}</strong></div>
-        <div><span>Origin</span><strong>${train.origin.name || train.origin.code || "Unknown"}</strong></div>
-        <div><span>Destination</span><strong>${train.destination.name || train.destination.code || "Unknown"}</strong></div>
-        <div><span>Arrival</span><strong>${formatTime(train.arrivalTime)}</strong></div>
-        <div><span>Source</span><strong>${train.timeSource || "unknown"}</strong></div>
+        <div><span>Arrival time</span><strong>${formatTime(train.arrivalTime)}</strong></div>
+        <div><span>Train name</span><strong>${trainName}</strong></div>
+        <div><span>Source</span><strong>${originName}</strong></div>
+        <div><span>Destination</span><strong>${destinationName}</strong></div>
       `;
 
       card.addEventListener("click", () => {
         const isExpanded = card.classList.toggle("is-expanded");
         card.setAttribute("aria-expanded", String(isExpanded));
+        indicator.textContent = isExpanded ? "Hide details" : "Details";
       });
 
       card.appendChild(eta);
