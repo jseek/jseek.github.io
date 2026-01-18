@@ -153,19 +153,19 @@ export function initArrivalsRenderer(elements) {
     return String(text || "").trim() || "N/A";
   }
 
-  function renderMapFallback(mapEl) {
+  function renderMapFallback(mapEl, reason = "Map unavailable for this train.") {
     mapEl.classList.add("map-unavailable");
-    mapEl.textContent = "Map unavailable for this train.";
+    mapEl.textContent = reason;
     mapEl.dataset.mapReady = "true";
   }
 
   function initMap(mapEl, train) {
     if (!window.L) {
-      renderMapFallback(mapEl);
+      renderMapFallback(mapEl, "Map unavailable: map library failed to load.");
       return;
     }
     if (!train?.trainLocation || !train?.stationLocation) {
-      renderMapFallback(mapEl);
+      renderMapFallback(mapEl, "Map unavailable: missing location data.");
       return;
     }
     const trainLabel = formatMapLabel(train.trainNum);
