@@ -59,6 +59,29 @@ function chooseArrivalTime(station) {
   return { time: null, source: "unknown" };
 }
 
+function readNumber(value) {
+  if (value === null || value === undefined || value === "") {
+    return null;
+  }
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) {
+    return null;
+  }
+  return numeric;
+}
+
+function getCoordinates(entity) {
+  if (!entity || typeof entity !== "object") {
+    return null;
+  }
+  const lat = readNumber(entity.lat ?? entity.latitude ?? entity.latit);
+  const lon = readNumber(entity.lon ?? entity.lng ?? entity.long ?? entity.longitude);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+    return null;
+  }
+  return { lat, lon };
+}
+
 function selectStationArrivals(trains, station, now) {
   const arrivals = [];
   const graceWindowMs = 15 * 60 * 1000;
@@ -106,6 +129,9 @@ function selectStationArrivals(trains, station, now) {
       }
     }
 
+    const trainLocation = getCoordinates(train);
+    const stationLocation = getCoordinates(stationStop);
+
     arrivals.push({
       station_code: station,
       trainNum: String(train.trainNum || train.trainID || ""),
@@ -122,6 +148,8 @@ function selectStationArrivals(trains, station, now) {
       etaMinutes: computeEtaMinutes(arrivalTime, now),
       statusMsg,
       timeSource,
+      trainLocation,
+      stationLocation,
     });
   });
 
