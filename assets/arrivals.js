@@ -6,6 +6,7 @@ const refreshIntervalMs = 30000;
 const stationCodeEl = document.getElementById("station-code");
 const stationInput = document.getElementById("station-input");
 const displaySelect = document.getElementById("display-select");
+const mapStyleSelect = document.getElementById("map-style");
 const applyStationBtn = document.getElementById("apply-station");
 const toggleNightBtn = document.getElementById("toggle-night");
 const toggleControlsBtn = document.getElementById("toggle-controls");
@@ -42,8 +43,12 @@ const urlParams = new URLSearchParams(window.location.search);
 let stationCode = (urlParams.get("station") || "FLG").toUpperCase();
 let nightMode = urlParams.get("night") === "1" || !urlParams.has("night");
 let displayType = urlParams.get("display") || "cards";
+let mapStyle = urlParams.get("map") || "slate";
 if (!["cards", "split"].includes(displayType)) {
   displayType = "cards";
+}
+if (!["light", "slate", "dark"].includes(mapStyle)) {
+  mapStyle = "slate";
 }
 
 function applyNightMode(enabled) {
@@ -59,6 +64,10 @@ function applyDisplayType(value) {
   splitSection.classList.toggle("is-hidden", !isSplit);
 }
 
+function applyMapStyle(value) {
+  renderer.setMapStyle(value);
+}
+
 function setControlsCollapsed(collapsed) {
   document.body.classList.toggle("controls-collapsed", collapsed);
   showControlsBtn.classList.toggle("is-hidden", !collapsed);
@@ -72,6 +81,7 @@ function updateUrl() {
     params.set("night", "1");
   }
   params.set("display", displayType);
+  params.set("map", mapStyle);
   window.history.replaceState({}, "", `?${params.toString()}`);
 }
 
@@ -116,6 +126,12 @@ displaySelect.addEventListener("change", (event) => {
   updateUrl();
 });
 
+mapStyleSelect.addEventListener("change", (event) => {
+  mapStyle = event.target.value;
+  applyMapStyle(mapStyle);
+  updateUrl();
+});
+
 toggleControlsBtn.addEventListener("click", () => {
   const collapsed = document.body.classList.contains("controls-collapsed");
   setControlsCollapsed(!collapsed);
@@ -127,9 +143,11 @@ showControlsBtn.addEventListener("click", () => {
 
 applyNightMode(nightMode);
 applyDisplayType(displayType);
+applyMapStyle(mapStyle);
 renderer.setStationCode(stationCode);
 stationInput.value = stationCode;
 displaySelect.value = displayType;
+mapStyleSelect.value = mapStyle;
 setControlsCollapsed(true);
 fetchData({ forceSplit: true });
 setInterval(fetchData, refreshIntervalMs);
