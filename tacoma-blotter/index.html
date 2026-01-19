@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tacoma Police Blotter</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="blotter">
+    <header class="blotter-header">
+      <div class="badge" aria-hidden="true">
+        <span>Tacoma</span>
+        <strong>Police</strong>
+      </div>
+      <div class="header-text">
+        <p class="eyebrow">Police Department</p>
+        <h1>Police Blotter</h1>
+        <p class="date-range" id="date-range">Loading date range...</p>
+      </div>
+    </header>
+
+    <details class="filters" id="filters-panel">
+      <summary>Filter options</summary>
+      <form class="filters-body" id="filters-form">
+        <div class="filters-row">
+          <div class="filter-group">
+            <label for="start-date">Start date</label>
+            <input type="date" id="start-date" name="start-date">
+          </div>
+          <div class="filter-group">
+            <label for="end-date">End date</label>
+            <input type="date" id="end-date" name="end-date">
+          </div>
+          <div class="filter-group filter-search">
+            <label for="search">Search address or description</label>
+            <input type="search" id="search" name="search" placeholder="Search incident text">
+          </div>
+          <div class="filter-group filter-actions">
+            <button type="button" class="button" id="apply-filters">Apply filters</button>
+            <button type="button" class="button button-secondary" id="clear-filters">Clear filters</button>
+          </div>
+        </div>
+
+        <div class="filters-row">
+          <fieldset class="filter-group" id="category-filters">
+            <legend>Offense category</legend>
+            <div class="checkbox-grid" data-filter="Offense_Category"></div>
+          </fieldset>
+          <fieldset class="filter-group" id="crimes-filters">
+            <legend>Crimes against</legend>
+            <div class="checkbox-grid" data-filter="Crimes_Against"></div>
+          </fieldset>
+          <fieldset class="filter-group" id="premise-filters">
+            <legend>Premise type</legend>
+            <div class="checkbox-grid" data-filter="Premise_Type"></div>
+          </fieldset>
+        </div>
+      </form>
+    </details>
+
+    <section class="blotter-meta">
+      <p id="results-count">Loading incidents...</p>
+    </section>
+
+    <section class="table-wrapper" aria-live="polite">
+      <table>
+        <thead>
+          <tr>
+            <th>Report #</th>
+            <th>Date &amp; Time</th>
+            <th>Address</th>
+            <th>Offense Category</th>
+            <th>Description</th>
+            <th>Premise Type</th>
+            <th>Crimes Against</th>
+          </tr>
+        </thead>
+        <tbody id="blotter-rows">
+          <tr>
+            <td colspan="7" class="loading">Loading incidents...</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div class="load-more">
+      <button type="button" class="button" id="load-more">Load more</button>
+      <p class="load-more-status" id="load-more-status"></p>
+    </div>
+
+    <footer class="blotter-footer">
+      <p>Report created for the Tacoma community.</p>
+    </footer>
+  </main>
+
+<script src="app.js" defer></script>
+</body>
+</html>
