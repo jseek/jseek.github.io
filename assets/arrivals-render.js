@@ -130,10 +130,16 @@ export function initArrivalsRenderer(elements) {
   const flapTimers = new WeakMap();
   const mapInstances = new Set();
   let nightMode = document.body.classList.contains("night");
+  let mapStyle = "slate";
 
-  function createTileLayer(isNight) {
-    if (isNight) {
+  function createTileLayer(style) {
+    if (style === "dark") {
       return L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
+      });
+    }
+    if (style === "slate") {
+      return L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
       });
     }
@@ -153,13 +159,20 @@ export function initArrivalsRenderer(elements) {
     return String(text || "").trim() || "N/A";
   }
 
+  function mapAttributionText(style) {
+    if (style === "dark" || style === "slate") {
+      return "Map tiles © OpenStreetMap contributors; styled tiles © CARTO.";
+    }
+    return "Map tiles © OpenStreetMap contributors.";
+  }
+
   function renderMapFallback(mapEl, reason = "Map unavailable for this train.") {
     mapEl.classList.add("map-unavailable");
     mapEl.textContent = reason;
     mapEl.dataset.mapReady = "true";
   }
 
-  function initMap(mapEl, train) {
+  function initMap(mapEl, train, attributionEl) {
     if (!window.L) {
       renderMapFallback(mapEl, "Map unavailable: map library failed to load.");
       return;
@@ -175,7 +188,7 @@ export function initArrivalsRenderer(elements) {
       ? [train.stationLocation.lat, train.stationLocation.lon]
       : null;
     const stationLabel = hasStationLocation
-      ? formatMapLabel(train.station_code || train.destination?.code)
+      ? formatMapLabel(train.station_name || train.station_code || train.destination?.code)
       : null;
     const map = L.map(mapEl, {
       zoomControl: false,
@@ -187,7 +200,7 @@ export function initArrivalsRenderer(elements) {
       keyboard: false,
       tap: false,
     });
-    const tileLayer = createTileLayer(nightMode).addTo(map);
+    const tileLayer = createTileLayer(mapStyle).addTo(map);
     L.marker(trainCoords, {
       icon: L.divIcon({
         className: "map-label map-label-train",
@@ -208,7 +221,10 @@ export function initArrivalsRenderer(elements) {
     } else {
       map.setView(trainCoords, 7, { animate: false });
     }
-    mapInstances.add({ map, tileLayer });
+    if (attributionEl) {
+      attributionEl.textContent = mapAttributionText(mapStyle);
+    }
+    mapInstances.add({ map, tileLayer, attributionEl });
     mapEl.dataset.mapReady = "true";
   }
 
@@ -391,7 +407,7 @@ export function initArrivalsRenderer(elements) {
 
       const mapAttribution = document.createElement("div");
       mapAttribution.className = "map-attribution";
-      mapAttribution.textContent = "Map tiles © OpenStreetMap contributors; dark tiles © CARTO.";
+      mapAttribution.textContent = mapAttributionText(mapStyle);
       details.appendChild(mapAttribution);
 
       card.addEventListener("click", () => {
@@ -400,7 +416,7 @@ export function initArrivalsRenderer(elements) {
         indicator.textContent = isExpanded ? "Hide details" : "Details";
         if (isExpanded && !mapEl.dataset.mapReady) {
           requestAnimationFrame(() => {
-            initMap(mapEl, train);
+            initMap(mapEl, train, mapAttribution);
           });
         }
       });
@@ -465,7 +481,18 @@ export function initArrivalsRenderer(elements) {
     nightMode = enabled;
     mapInstances.forEach((entry) => {
       entry.map.removeLayer(entry.tileLayer);
-      entry.tileLayer = createTileLayer(nightMode).addTo(entry.map);
+      entry.tileLayer = createTileLayer(mapStyle).addTo(entry.map);
+    });
+  }
+
+  function setMapStyle(value) {
+    mapStyle = value;
+    mapInstances.forEach((entry) => {
+      entry.map.removeLayer(entry.tileLayer);
+      entry.tileLayer = createTileLayer(mapStyle).addTo(entry.map);
+      if (entry.attributionEl) {
+        entry.attributionEl.textContent = mapAttributionText(mapStyle);
+      }
     });
   }
 
@@ -477,5 +504,6 @@ export function initArrivalsRenderer(elements) {
     renderStale,
     setStationCode,
     setNightMode,
+    setMapStyle,
   };
 }

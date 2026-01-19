@@ -1,5 +1,6 @@
 const trainsEndpoint = "https://api-v3.amtraker.com/v3/trains";
 const staleEndpoint = "https://api-v3.amtraker.com/v3/stale";
+const stationsEndpoint = "https://api-v3.amtraker.com/v3/stations";
 
 function normalizeTrainsPayload(data) {
   if (data && Array.isArray(data.trains)) {
@@ -18,6 +19,22 @@ function normalizeTrainsPayload(data) {
       });
     });
     return flattened;
+  }
+  return [];
+}
+
+function normalizeStationsPayload(data) {
+  if (!data) {
+    return [];
+  }
+  if (Array.isArray(data)) {
+    return data.filter((item) => item && typeof item === "object");
+  }
+  if (typeof data === "object") {
+    if (Array.isArray(data.stations)) {
+      return data.stations.filter((item) => item && typeof item === "object");
+    }
+    return Object.values(data).filter((item) => item && typeof item === "object");
   }
   return [];
 }
@@ -82,10 +99,30 @@ function getCoordinates(entity) {
   return { lat, lon };
 }
 
-function selectStationArrivals(trains, station, now) {
+function buildStationLookup(stations) {
+  const lookup = new Map();
+  stations.forEach((station) => {
+    const code = (station.code || station.station_code || station.stationCode || "").trim();
+    if (!code) {
+      return;
+    }
+    const coords = getCoordinates(station);
+    if (!coords) {
+      return;
+    }
+    lookup.set(code.toUpperCase(), {
+      coords,
+      name: station.name || station.stationName || "",
+    });
+  });
+  return lookup;
+}
+
+function selectStationArrivals(trains, station, now, stationLookup) {
   const arrivals = [];
   const graceWindowMs = 15 * 60 * 1000;
   const delayThresholdMs = 5 * 60 * 1000;
+  const normalizedStation = station.toUpperCase();
 
   trains.forEach((train) => {
     const stations = Array.isArray(train.stations) ? train.stations : [];
@@ -130,10 +167,13 @@ function selectStationArrivals(trains, station, now) {
     }
 
     const trainLocation = getCoordinates(train);
-    const stationLocation = getCoordinates(stationStop);
+    const lookupEntry = stationLookup?.get(normalizedStation);
+    const stationLocation = lookupEntry?.coords || getCoordinates(stationStop);
+    const stationName = lookupEntry?.name || stationStop.name || "";
 
     arrivals.push({
       station_code: station,
+      station_name: stationName,
       trainNum: String(train.trainNum || train.trainID || ""),
       routeName: train.routeName || train.route || "",
       origin: {
@@ -177,11 +217,25 @@ async function fetchTrainsPayload() {
   return response.json();
 }
 
+async function fetchStationsPayload() {
+  const response = await fetch(stationsEndpoint, { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error(`Bad response: ${response.status}`);
+  }
+  return response.json();
+}
+
 export async function fetchArrivalsData(stationCode) {
-  const [payload, stale] = await Promise.all([fetchTrainsPayload(), fetchStaleFlag()]);
+  const [payload, stale, stationsPayload] = await Promise.all([
+    fetchTrainsPayload(),
+    fetchStaleFlag(),
+    fetchStationsPayload().catch(() => null),
+  ]);
   const trains = normalizeTrainsPayload(payload);
+  const stations = normalizeStationsPayload(stationsPayload);
+  const stationLookup = buildStationLookup(stations);
   const now = new Date();
-  const arrivals = selectStationArrivals(trains, stationCode, now);
+  const arrivals = selectStationArrivals(trains, stationCode, now, stationLookup);
   const nextTrain = arrivals[0] || null;
 
   return {
