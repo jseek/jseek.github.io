@@ -225,6 +225,25 @@ async function fetchStationsPayload() {
   return response.json();
 }
 
+export async function fetchStationLocations() {
+  const stationsPayload = await fetchStationsPayload();
+  const stations = normalizeStationsPayload(stationsPayload);
+  return stations
+    .map((station) => {
+      const code = (station.code || station.station_code || station.stationCode || "").trim();
+      const coords = getCoordinates(station);
+      if (!code || !coords) {
+        return null;
+      }
+      return {
+        code: code.toUpperCase(),
+        name: station.name || station.stationName || "",
+        coords,
+      };
+    })
+    .filter(Boolean);
+}
+
 export async function fetchArrivalsData(stationCode) {
   const [payload, stale, stationsPayload] = await Promise.all([
     fetchTrainsPayload(),

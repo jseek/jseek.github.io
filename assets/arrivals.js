@@ -1,4 +1,4 @@
-import { fetchArrivalsData } from "./arrivals-data.js";
+import { fetchArrivalsData, fetchStationLocations } from "./arrivals-data.js";
 import { buildSplitTrains, initArrivalsRenderer } from "./arrivals-render.js";
 
 const refreshIntervalMs = 30000;
@@ -85,6 +85,16 @@ function updateUrl() {
   window.history.replaceState({}, "", `?${params.toString()}`);
 }
 
+function setStation(newCode, options = {}) {
+  stationCode = newCode;
+  stationInput.value = stationCode;
+  renderer.setStationCode(stationCode);
+  updateUrl();
+  if (options.fetch) {
+    fetchData({ forceSplit: true });
+  }
+}
+
 async function fetchData(options = {}) {
   try {
     const data = await fetchArrivalsData(stationCode);
@@ -99,12 +109,75 @@ async function fetchData(options = {}) {
   }
 }
 
+function computeDistanceKm(a, b) {
+  const earthRadiusKm = 6371;
+  const toRadians = (value) => (value * Math.PI) / 180;
+  const dLat = toRadians(b.lat - a.lat);
+  const dLon = toRadians(b.lon - a.lon);
+  const lat1 = toRadians(a.lat);
+  const lat2 = toRadians(b.lat);
+  const sinLat = Math.sin(dLat / 2);
+  const sinLon = Math.sin(dLon / 2);
+  const haversine =
+    sinLat * sinLat + Math.cos(lat1) * Math.cos(lat2) * sinLon * sinLon;
+  return 2 * earthRadiusKm * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
+}
+
+function getCurrentPosition() {
+  if (!("geolocation" in navigator)) {
+    return Promise.reject(new Error("Geolocation unavailable"));
+  }
+  return new Promise((resolve, reject) => {
+    const timeoutId = window.setTimeout(() => {
+      reject(new Error("Geolocation timeout"));
+    }, 8000);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        window.clearTimeout(timeoutId);
+        resolve(position);
+      },
+      (error) => {
+        window.clearTimeout(timeoutId);
+        reject(error);
+      },
+      { enableHighAccuracy: false, timeout: 7000, maximumAge: 600000 },
+    );
+  });
+}
+
+async function chooseNearestStationFromLocation() {
+  if (urlParams.has("station")) {
+    return null;
+  }
+  try {
+    const position = await getCurrentPosition();
+    const { latitude, longitude } = position.coords;
+    const stations = await fetchStationLocations();
+    if (!stations.length) {
+      return null;
+    }
+    let closest = stations[0];
+    let closestDistance = Number.POSITIVE_INFINITY;
+    stations.forEach((station) => {
+      const distance = computeDistanceKm(
+        { lat: latitude, lon: longitude },
+        station.coords,
+      );
+      if (distance < closestDistance) {
+        closest = station;
+        closestDistance = distance;
+      }
+    });
+    return closest.code;
+  } catch (error) {
+    return null;
+  }
+}
+
 applyStationBtn.addEventListener("click", () => {
   const inputValue = stationInput.value.trim().toUpperCase();
   if (inputValue) {
-    stationCode = inputValue;
-    updateUrl();
-    fetchData({ forceSplit: true });
+    setStation(inputValue, { fetch: true });
   }
 });
 
@@ -141,13 +214,23 @@ showControlsBtn.addEventListener("click", () => {
   setControlsCollapsed(false);
 });
 
-applyNightMode(nightMode);
-applyDisplayType(displayType);
-applyMapStyle(mapStyle);
-renderer.setStationCode(stationCode);
-stationInput.value = stationCode;
-displaySelect.value = displayType;
-mapStyleSelect.value = mapStyle;
-setControlsCollapsed(true);
-fetchData({ forceSplit: true });
-setInterval(fetchData, refreshIntervalMs);
+async function initPage() {
+  applyNightMode(nightMode);
+  applyDisplayType(displayType);
+  applyMapStyle(mapStyle);
+  renderer.setStationCode(stationCode);
+  stationInput.value = stationCode;
+  displaySelect.value = displayType;
+  mapStyleSelect.value = mapStyle;
+  setControlsCollapsed(true);
+
+  const nearestStation = await chooseNearestStationFromLocation();
+  if (nearestStation) {
+    setStation(nearestStation);
+  }
+
+  fetchData({ forceSplit: true });
+  setInterval(fetchData, refreshIntervalMs);
+}
+
+initPage();
