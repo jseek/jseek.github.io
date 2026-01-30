@@ -1,0 +1,167 @@
+:root {
+  color-scheme: light;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  background-color: #f4f6f8;
+  color: #1b1f24;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.page-header {
+  padding: 2rem 5vw 1rem;
+  background: #1f3b57;
+  color: #fff;
+}
+
+.page-header h1 {
+  margin: 0 0 0.5rem;
+}
+
+.status-panel {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.5rem 5vw;
+  background: #fff;
+  border-bottom: 1px solid #d9dee3;
+}
+
+.status-panel h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #5b6773;
+}
+
+#status-message {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.legend ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.5rem 1rem;
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.legend-dot {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.legend-dot.open {
+  background: #d64545;
+}
+
+.legend-dot.acknowledged {
+  background: #f4a640;
+}
+
+.legend-dot.closed {
+  background: #3e9b5f;
+}
+
+.legend-dot.other {
+  background: #4e79a7;
+}
+
+main {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  gap: 1.5rem;
+  padding: 1.5rem 5vw 3rem;
+}
+
+#map {
+  width: 100%;
+  min-height: 60vh;
+  border-radius: 12px;
+  border: 1px solid #d9dee3;
+  overflow: hidden;
+}
+
+.results {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  border: 1px solid #d9dee3;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.results h2 {
+  margin-top: 0;
+}
+
+#issue-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.issue-item {
+  border-left: 4px solid #4e79a7;
+  padding-left: 0.75rem;
+}
+
+.issue-item h3 {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+}
+
+.issue-item p {
+  margin: 0.15rem 0;
+  color: #4c5560;
+  font-size: 0.9rem;
+}
+
+.issue-item .meta {
+  font-size: 0.85rem;
+  color: #6c7885;
+}
+
+.issue-item.open {
+  border-left-color: #d64545;
+}
+
+.issue-item.acknowledged {
+  border-left-color: #f4a640;
+}
+
+.issue-item.closed {
+  border-left-color: #3e9b5f;
+}
+
+@media (max-width: 960px) {
+  main {
+    grid-template-columns: 1fr;
+  }
+
+  #map {
+    min-height: 50vh;
+  }
+}
