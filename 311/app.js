@@ -1,0 +1,167 @@
+const statusMessage = document.getElementById("status-message");
+const issueList = document.getElementById("issue-list");
+
+const DEFAULT_LOCATION = {
+  lat: 47.2529,
+  lng: -122.4443,
+  label: "Tacoma, WA (default)"
+};
+
+const STATUS_COLORS = {
+  open: "#d64545",
+  acknowledged: "#f4a640",
+  closed: "#3e9b5f",
+  other: "#4e79a7"
+};
+
+const statusToClass = (status) => {
+  if (!status) return "other";
+  const key = status.toLowerCase();
+  if (key.includes("open")) return "open";
+  if (key.includes("ack")) return "acknowledged";
+  if (key.includes("closed")) return "closed";
+  return "other";
+};
+
+const buildMap = (coords) => {
+  const map = L.map("map").setView([coords.lat, coords.lng], 15);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "&copy; OpenStreetMap contributors"
+  }).addTo(map);
+
+  L.marker([coords.lat, coords.lng])
+    .addTo(map)
+    .bindPopup(`You are here: ${coords.label}`)
+    .openPopup();
+
+  const radiusFeet = 2000;
+  const radiusMeters = radiusFeet * 0.3048;
+  L.circle([coords.lat, coords.lng], {
+    radius: radiusMeters,
+    color: "#1f3b57",
+    fillColor: "#1f3b57",
+    fillOpacity: 0.08
+  }).addTo(map);
+
+  return map;
+};
+
+const renderIssues = (issues) => {
+  issueList.innerHTML = "";
+
+  if (!issues.length) {
+    const emptyItem = document.createElement("li");
+    emptyItem.textContent = "No issues found within 2,000 feet.";
+    issueList.appendChild(emptyItem);
+    return;
+  }
+
+  issues.forEach((issue) => {
+    const item = document.createElement("li");
+    const statusClass = statusToClass(issue.status);
+    item.className = `issue-item ${statusClass}`;
+
+    const title = document.createElement("h3");
+    title.textContent = issue.summary || "Untitled issue";
+
+    const status = document.createElement("p");
+    status.textContent = `Status: ${issue.status || "Unknown"}`;
+
+    const address = document.createElement("p");
+    address.textContent = issue.address || "Address unavailable";
+
+    const meta = document.createElement("p");
+    meta.className = "meta";
+    const createdAt = issue.created_at
+      ? new Date(issue.created_at).toLocaleString()
+      : "Unknown date";
+    meta.textContent = `Created: ${createdAt}`;
+
+    item.append(title, status, address, meta);
+    issueList.appendChild(item);
+  });
+};
+
+const addIssueMarkers = (map, issues) => {
+  issues.forEach((issue) => {
+    if (!issue.lat || !issue.lng) return;
+
+    const statusClass = statusToClass(issue.status);
+    const color = STATUS_COLORS[statusClass] || STATUS_COLORS.other;
+
+    L.circleMarker([issue.lat, issue.lng], {
+      radius: 6,
+      color,
+      fillColor: color,
+      fillOpacity: 0.9,
+      weight: 1
+    })
+      .addTo(map)
+      .bindPopup(
+        `<strong>${issue.summary || "Untitled"}</strong><br>` +
+          `${issue.status || "Unknown status"}`
+      );
+  });
+};
+
+const fetchIssues = async (coords) => {
+  const radiusMiles = (2000 / 5280).toFixed(3);
+  const params = new URLSearchParams({
+    lat: coords.lat,
+    lng: coords.lng,
+    radius: radiusMiles,
+    per_page: 100
+  });
+
+  const response = await fetch(`https://seeclickfix.com/api/v2/issues?${params}`);
+  if (!response.ok) {
+    throw new Error("Unable to load issues from SeeClickFix.");
+  }
+
+  const data = await response.json();
+  return data.issues || [];
+};
+
+const loadIssuesForLocation = async (coords) => {
+  statusMessage.textContent = `Finding issues within 2,000 feet of ${coords.label}…`;
+
+  const map = buildMap(coords);
+
+  try {
+    const issues = await fetchIssues(coords);
+    renderIssues(issues);
+    addIssueMarkers(map, issues);
+    statusMessage.textContent = `Loaded ${issues.length} nearby issues.`;
+  } catch (error) {
+    statusMessage.textContent = error.message;
+    renderIssues([]);
+  }
+};
+
+const handleGeolocationSuccess = (position) => {
+  const coords = {
+    lat: position.coords.latitude,
+    lng: position.coords.longitude,
+    label: "your current location"
+  };
+  loadIssuesForLocation(coords);
+};
+
+const handleGeolocationError = () => {
+  statusMessage.textContent =
+    "Location access denied. Showing issues near Tacoma, WA instead.";
+  loadIssuesForLocation(DEFAULT_LOCATION);
+};
+
+if ("geolocation" in navigator) {
+  navigator.geolocation.getCurrentPosition(
+    handleGeolocationSuccess,
+    handleGeolocationError,
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+  );
+} else {
+  statusMessage.textContent =
+    "Geolocation is not supported in this browser. Showing default location.";
+  loadIssuesForLocation(DEFAULT_LOCATION);
+}
