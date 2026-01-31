@@ -105,12 +105,27 @@ const addIssueMarkers = (map, issues) => {
   });
 };
 
+const buildBoundingBox = (coords, radiusFeet) => {
+  const radiusMiles = radiusFeet / 5280;
+  const milesPerDegreeLat = 69;
+  const milesPerDegreeLng = 69 * Math.cos((coords.lat * Math.PI) / 180);
+
+  const latDelta = radiusMiles / milesPerDegreeLat;
+  const lngDelta = radiusMiles / milesPerDegreeLng;
+
+  const southLat = coords.lat - latDelta;
+  const northLat = coords.lat + latDelta;
+  const westLng = coords.lng - lngDelta;
+  const eastLng = coords.lng + lngDelta;
+
+  return `${southLat},${westLng},${northLat},${eastLng}`;
+};
+
 const fetchIssues = async (coords) => {
-  const radiusMiles = (2000 / 5280).toFixed(3);
+  const radiusFeet = 2000;
+  const bbox = buildBoundingBox(coords, radiusFeet);
   const params = new URLSearchParams({
-    lat: coords.lat,
-    lng: coords.lng,
-    radius: radiusMiles,
+    bbox,
     per_page: 100
   });
 
