@@ -123,10 +123,11 @@ const buildBoundingBox = (coords, radiusFeet) => {
 };
 
 const fetchIssues = async (coords) => {
-  const radiusFeet = 2000;
-  const bbox = buildBoundingBox(coords, radiusFeet);
   const params = new URLSearchParams({
-    bbox,
+    lat: coords.lat,
+    lng: coords.lng,
+    zoom: 5,
+    status: "open",
     per_page: 100
   });
 
