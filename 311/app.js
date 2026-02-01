@@ -21,6 +21,17 @@ const STATUS_COLORS = {
   other: "#4e79a7"
 };
 
+const getIssueId = (issue) => {
+  if (!issue) return null;
+  return issue.id || issue.issue_id || issue.issueId || null;
+};
+
+const buildIssueLink = (issue) => {
+  const issueId = getIssueId(issue);
+  if (!issueId) return null;
+  return `issue.html?id=${encodeURIComponent(issueId)}`;
+};
+
 const statusToClass = (status) => {
   if (!status) return "other";
   const key = status.toLowerCase();
@@ -71,7 +82,16 @@ const renderIssues = (issues) => {
     item.className = `issue-item ${statusClass}`;
 
     const title = document.createElement("h3");
-    title.textContent = issue.summary || "Untitled issue";
+    const issueLink = buildIssueLink(issue);
+    if (issueLink) {
+      const link = document.createElement("a");
+      link.href = issueLink;
+      link.className = "issue-title-link";
+      link.textContent = issue.summary || "Untitled issue";
+      title.appendChild(link);
+    } else {
+      title.textContent = issue.summary || "Untitled issue";
+    }
 
     const status = document.createElement("p");
     status.textContent = `Status: ${issue.status || "Unknown"}`;
@@ -97,6 +117,10 @@ const addIssueMarkers = (map, issues) => {
 
     const statusClass = statusToClass(issue.status);
     const color = STATUS_COLORS[statusClass] || STATUS_COLORS.other;
+    const issueLink = buildIssueLink(issue);
+    const issueLinkHtml = issueLink
+      ? `<br><a class="issue-link" href="${issueLink}">See Issue</a>`
+      : "";
 
     L.circleMarker([issue.lat, issue.lng], {
       radius: 6,
@@ -108,7 +132,7 @@ const addIssueMarkers = (map, issues) => {
       .addTo(map)
       .bindPopup(
         `<strong>${issue.summary || "Untitled"}</strong><br>` +
-          `${issue.status || "Unknown status"}`
+          `${issue.status || "Unknown status"}${issueLinkHtml}`
       );
   });
 };
