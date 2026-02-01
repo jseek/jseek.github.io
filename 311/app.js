@@ -114,20 +114,26 @@ const buildBoundingBox = (coords, radiusFeet) => {
   const latDelta = radiusMiles / milesPerDegreeLat;
   const lngDelta = radiusMiles / milesPerDegreeLng;
 
-  const southLat = coords.lat - latDelta;
-  const northLat = coords.lat + latDelta;
-  const westLng = coords.lng - lngDelta;
-  const eastLng = coords.lng + lngDelta;
+  const minLat = coords.lat - latDelta;
+  const maxLat = coords.lat + latDelta;
+  const minLng = coords.lng - lngDelta;
+  const maxLng = coords.lng + lngDelta;
 
-  return `${southLat},${westLng},${northLat},${eastLng}`;
+  return {
+    min_lat: minLat,
+    min_lng: minLng,
+    max_lat: maxLat,
+    max_lng: maxLng
+  };
 };
 
 const fetchIssues = async (coords) => {
+  const bbox = buildBoundingBox(coords, 2000);
   const params = new URLSearchParams({
-    lat: coords.lat,
-    lng: coords.lng,
-    zoom: 5,
-    status: "open",
+    min_lat: bbox.min_lat,
+    min_lng: bbox.min_lng,
+    max_lat: bbox.max_lat,
+    max_lng: bbox.max_lng,
     per_page: 100
   });
 
