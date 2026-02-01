@@ -1,6 +1,8 @@
 const statusMessage = document.getElementById("status-message");
 const statusUrl = document.getElementById("status-url");
+const statusFilter = document.getElementById("status-filter");
 const issueList = document.getElementById("issue-list");
+let currentCoords = DEFAULT_LOCATION;
 
 const DEFAULT_LOCATION = {
   lat: 47.2529,
@@ -127,6 +129,14 @@ const buildBoundingBox = (coords, radiusFeet) => {
   };
 };
 
+const getSelectedStatuses = () => {
+  if (!statusFilter) return "open";
+  const values = Array.from(statusFilter.selectedOptions).map(
+    (option) => option.value
+  );
+  return values.length ? values.join(",") : "open";
+};
+
 const fetchIssues = async (coords) => {
   const bbox = buildBoundingBox(coords, 2000);
   const params = new URLSearchParams({
@@ -134,6 +144,7 @@ const fetchIssues = async (coords) => {
     min_lng: bbox.min_lng,
     max_lat: bbox.max_lat,
     max_lng: bbox.max_lng,
+    status: getSelectedStatuses(),
     per_page: 100
   });
 
@@ -152,6 +163,7 @@ const fetchIssues = async (coords) => {
 };
 
 const loadIssuesForLocation = async (coords) => {
+  currentCoords = coords;
   statusMessage.textContent = `Finding issues within 2,000 feet of ${coords.label}…`;
 
   const map = buildMap(coords);
@@ -192,4 +204,10 @@ if ("geolocation" in navigator) {
   statusMessage.textContent =
     "Geolocation is not supported in this browser. Showing default location.";
   loadIssuesForLocation(DEFAULT_LOCATION);
+}
+
+if (statusFilter) {
+  statusFilter.addEventListener("change", () => {
+    loadIssuesForLocation(currentCoords);
+  });
 }
