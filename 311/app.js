@@ -11,6 +11,7 @@ const DEFAULT_LOCATION = {
   label: "Tacoma, WA (default)"
 };
 let currentCoords = null;
+let mapInstance = null;
 
 const STATUS_COLORS = {
   open: "#d64545",
@@ -170,12 +171,15 @@ const loadIssuesForLocation = async (coords) => {
   currentCoords = coords;
   statusMessage.textContent = `Finding issues within 2,000 feet of ${coords.label}…`;
 
-  const map = buildMap(coords);
+  if (mapInstance) {
+    mapInstance.remove();
+  }
+  mapInstance = buildMap(coords);
 
   try {
     const issues = await fetchIssues(coords);
     renderIssues(issues);
-    addIssueMarkers(map, issues);
+    addIssueMarkers(mapInstance, issues);
     statusMessage.textContent = `Loaded ${issues.length} nearby issues.`;
   } catch (error) {
     statusMessage.textContent = error.message;
