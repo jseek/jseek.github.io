@@ -47,6 +47,43 @@ body {
   font-size: 1rem;
 }
 
+#status-url {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: #6c7885;
+  word-break: break-all;
+}
+
+.status-filters {
+  margin: 0.85rem 0 0;
+  padding: 0.75rem;
+  border: 1px solid #d9dee3;
+  border-radius: 10px;
+  display: grid;
+  gap: 0.5rem;
+  background: #f8fafc;
+}
+
+.status-filters legend {
+  padding: 0 0.35rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #5b6773;
+}
+
+.status-filters label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.status-filters input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+}
+
 .legend ul {
   list-style: none;
   padding: 0;

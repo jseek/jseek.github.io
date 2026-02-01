@@ -19,13 +19,13 @@
       <h2>Status</h2>
       <p id="status-message">Requesting your location…</p>
       <p id="status-url">Query URL: —</p>
-      <label for="status-filter">Filter statuses</label>
-      <select id="status-filter" multiple>
-        <option value="open" selected>Open</option>
-        <option value="acknowledged">Acknowledged</option>
-        <option value="closed">Closed</option>
-        <option value="archived">Archived</option>
-      </select>
+      <fieldset class="status-filters" id="status-filters">
+        <legend>Filter statuses</legend>
+        <label><input type="checkbox" name="status-filter" value="open" checked> Open</label>
+        <label><input type="checkbox" name="status-filter" value="acknowledged"> Acknowledged</label>
+        <label><input type="checkbox" name="status-filter" value="closed"> Closed</label>
+        <label><input type="checkbox" name="status-filter" value="archived"> Archived</label>
+      </fieldset>
     </div>
     <div class="legend">
       <h2>Legend</h2>

@@ -1,6 +1,8 @@
 const statusMessage = document.getElementById("status-message");
 const statusUrl = document.getElementById("status-url");
-const statusFilter = document.getElementById("status-filter");
+const statusFilters = document.querySelectorAll(
+  'input[name="status-filter"]'
+);
 const issueList = document.getElementById("issue-list");
 
 const DEFAULT_LOCATION = {
@@ -130,10 +132,10 @@ const buildBoundingBox = (coords, radiusFeet) => {
 };
 
 const getSelectedStatuses = () => {
-  if (!statusFilter) return "open";
-  const values = Array.from(statusFilter.selectedOptions).map(
-    (option) => option.value
-  );
+  if (!statusFilters.length) return "open";
+  const values = Array.from(statusFilters)
+    .filter((input) => input.checked)
+    .map((input) => input.value);
   return values.length ? values.join(",") : "open";
 };
 
@@ -206,8 +208,10 @@ if ("geolocation" in navigator) {
   loadIssuesForLocation(DEFAULT_LOCATION);
 }
 
-if (statusFilter) {
-  statusFilter.addEventListener("change", () => {
-    loadIssuesForLocation(currentCoords || DEFAULT_LOCATION);
+if (statusFilters.length) {
+  statusFilters.forEach((input) => {
+    input.addEventListener("change", () => {
+      loadIssuesForLocation(currentCoords || DEFAULT_LOCATION);
+    });
   });
 }
