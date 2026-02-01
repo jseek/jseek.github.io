@@ -32,6 +32,7 @@ body {
   padding: 1.5rem 5vw;
   background: #fff;
   border-bottom: 1px solid #d9dee3;
+  align-items: flex-start;
 }
 
 .status-panel h2 {
@@ -54,8 +55,16 @@ body {
   word-break: break-all;
 }
 
+.status-info {
+  flex: 1 1 320px;
+}
+
+.status-filters-panel {
+  flex: 0 1 280px;
+}
+
 .status-filters {
-  margin: 0.85rem 0 0;
+  margin: 0;
   padding: 0.75rem;
   border: 1px solid #d9dee3;
   border-radius: 10px;
@@ -84,22 +93,6 @@ body {
   height: 1rem;
 }
 
-.legend ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 0.5rem 1rem;
-}
-
-.legend li {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.95rem;
-}
-
 .legend-dot {
   width: 0.75rem;
   height: 0.75rem;
@@ -121,6 +114,10 @@ body {
 
 .legend-dot.other {
   background: #4e79a7;
+}
+
+.legend-dot.archived {
+  background: #7a828c;
 }
 
 main {
@@ -191,6 +188,10 @@ main {
 
 .issue-item.closed {
   border-left-color: #3e9b5f;
+}
+
+.issue-item.archived {
+  border-left-color: #7a828c;
 }
 
 @media (max-width: 960px) {

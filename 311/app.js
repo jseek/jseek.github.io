@@ -16,6 +16,7 @@ const STATUS_COLORS = {
   open: "#d64545",
   acknowledged: "#f4a640",
   closed: "#3e9b5f",
+  archived: "#7a828c",
   other: "#4e79a7"
 };
 
@@ -25,6 +26,7 @@ const statusToClass = (status) => {
   if (key.includes("open")) return "open";
   if (key.includes("ack")) return "acknowledged";
   if (key.includes("closed")) return "closed";
+  if (key.includes("arch")) return "archived";
   return "other";
 };
 

@@ -15,26 +15,35 @@
   </header>
 
   <section class="status-panel">
-    <div>
+    <div class="status-info">
       <h2>Status</h2>
       <p id="status-message">Requesting your location…</p>
       <p id="status-url">Query URL: —</p>
+    </div>
+    <div class="status-filters-panel">
       <fieldset class="status-filters" id="status-filters">
         <legend>Filter statuses</legend>
-        <label><input type="checkbox" name="status-filter" value="open" checked> Open</label>
-        <label><input type="checkbox" name="status-filter" value="acknowledged"> Acknowledged</label>
-        <label><input type="checkbox" name="status-filter" value="closed"> Closed</label>
-        <label><input type="checkbox" name="status-filter" value="archived"> Archived</label>
+        <label>
+          <span class="legend-dot open"></span>
+          <input type="checkbox" name="status-filter" value="open" checked>
+          Open
+        </label>
+        <label>
+          <span class="legend-dot acknowledged"></span>
+          <input type="checkbox" name="status-filter" value="acknowledged">
+          Acknowledged
+        </label>
+        <label>
+          <span class="legend-dot closed"></span>
+          <input type="checkbox" name="status-filter" value="closed">
+          Closed
+        </label>
+        <label>
+          <span class="legend-dot archived"></span>
+          <input type="checkbox" name="status-filter" value="archived">
+          Archived
+        </label>
       </fieldset>
-    </div>
-    <div class="legend">
-      <h2>Legend</h2>
-      <ul>
-        <li><span class="legend-dot open"></span>Open</li>
-        <li><span class="legend-dot acknowledged"></span>Acknowledged</li>
-        <li><span class="legend-dot closed"></span>Closed</li>
-        <li><span class="legend-dot other"></span>Other</li>
-      </ul>
     </div>
   </section>
 
