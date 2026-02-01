@@ -2,13 +2,13 @@ const statusMessage = document.getElementById("status-message");
 const statusUrl = document.getElementById("status-url");
 const statusFilter = document.getElementById("status-filter");
 const issueList = document.getElementById("issue-list");
-let currentCoords = DEFAULT_LOCATION;
 
 const DEFAULT_LOCATION = {
   lat: 47.2529,
   lng: -122.4443,
   label: "Tacoma, WA (default)"
 };
+let currentCoords = null;
 
 const STATUS_COLORS = {
   open: "#d64545",
@@ -208,6 +208,6 @@ if ("geolocation" in navigator) {
 
 if (statusFilter) {
   statusFilter.addEventListener("change", () => {
-    loadIssuesForLocation(currentCoords);
+    loadIssuesForLocation(currentCoords || DEFAULT_LOCATION);
   });
 }
