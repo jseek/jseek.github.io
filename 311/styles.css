@@ -167,6 +167,16 @@ main {
   font-size: 1rem;
 }
 
+.issue-title-link {
+  color: #1f3b57;
+  text-decoration: none;
+}
+
+.issue-title-link:hover,
+.issue-title-link:focus {
+  text-decoration: underline;
+}
+
 .issue-item p {
   margin: 0.15rem 0;
   color: #4c5560;
@@ -194,6 +204,82 @@ main {
   border-left-color: #7a828c;
 }
 
+.issue-link {
+  color: #1f3b57;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.issue-link:hover,
+.issue-link:focus {
+  text-decoration: underline;
+}
+
+.issue-page {
+  background: #f4f6f8;
+  min-height: 100vh;
+}
+
+.issue-panel {
+  padding: 1.5rem 5vw 3rem;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #d9e5f1;
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+
+.back-link:hover,
+.back-link:focus {
+  text-decoration: underline;
+}
+
+.issue-detail {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid #d9dee3;
+  display: grid;
+  gap: 1rem;
+}
+
+.issue-detail h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.issue-detail dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 160px) minmax(0, 1fr);
+  gap: 0.5rem 1rem;
+}
+
+.issue-detail dt {
+  font-weight: 600;
+  color: #1f3b57;
+}
+
+.issue-detail dd {
+  margin: 0;
+  color: #4c5560;
+}
+
+.issue-detail .external-link {
+  color: #1f3b57;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.issue-detail .external-link:hover,
+.issue-detail .external-link:focus {
+  text-decoration: underline;
+}
+
 @media (max-width: 960px) {
   main {
     grid-template-columns: 1fr;
@@ -201,5 +287,9 @@ main {
 
   #map {
     min-height: 50vh;
+  }
+
+  .issue-detail dl {
+    grid-template-columns: 1fr;
   }
 }
