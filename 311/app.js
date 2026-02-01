@@ -1,4 +1,5 @@
 const statusMessage = document.getElementById("status-message");
+const statusUrl = document.getElementById("status-url");
 const issueList = document.getElementById("issue-list");
 
 const DEFAULT_LOCATION = {
@@ -129,7 +130,12 @@ const fetchIssues = async (coords) => {
     per_page: 100
   });
 
-  const response = await fetch(`https://seeclickfix.com/api/v2/issues?${params}`);
+  const url = `https://seeclickfix.com/api/v2/issues?${params.toString()}`;
+  if (statusUrl) {
+    statusUrl.textContent = `Query URL: ${url}`;
+  }
+  console.info("Fetching issues:", url);
+  const response = await fetch(url);
   if (!response.ok) {
     throw new Error("Unable to load issues from SeeClickFix.");
   }
