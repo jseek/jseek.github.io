@@ -1,5 +1,7 @@
 const DEFAULT_LOCATION = { lat: 47.2474269, lon: -122.4639354 };
-const REFRESH_MS = 5000;
+const DEFAULT_REFRESH_MS = 15000;
+const ERROR_REFRESH_MS = 30000;
+const RATE_LIMIT_REFRESH_MS = 60000;
 
 const locationBanner = document.getElementById('location-banner');
 const radiusSlider = document.getElementById('radius-slider');
@@ -17,7 +19,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 const viewerIcon = L.divIcon({ className: 'viewer-dot', iconSize: [14, 14], iconAnchor: [7, 7] });
 
 let viewer = { ...DEFAULT_LOCATION };
-let refreshIntervalId;
+let refreshTimeoutId;
 let isRefreshing = false;
 let hasFittedBounds = false;
 
@@ -108,7 +110,34 @@ function updateAircraftMarkers(aircraft = []) {
 
 function setStatus(total, now) {
     const timestamp = now ? new Date(now) : new Date();
-    statusLine.textContent = `Last updated: ${timestamp.toLocaleTimeString()} • Aircraft: ${total}`;
+    statusLine.textContent = `Last updated: ${timestamp.toLocaleTimeString()} • Aircraft: ${total} • Auto-refresh: 15s`;
+}
+
+function parseRetryAfterHeader(value) {
+    if (!value) {
+        return null;
+    }
+
+    const asSeconds = Number(value);
+    if (Number.isFinite(asSeconds) && asSeconds > 0) {
+        return asSeconds * 1000;
+    }
+
+    const asDate = Date.parse(value);
+    if (Number.isFinite(asDate)) {
+        const delta = asDate - Date.now();
+        return delta > 0 ? delta : null;
+    }
+
+    return null;
+}
+
+function scheduleNextRefresh(delayMs = DEFAULT_REFRESH_MS) {
+    if (refreshTimeoutId) {
+        window.clearTimeout(refreshTimeoutId);
+    }
+
+    refreshTimeoutId = window.setTimeout(fetchAircraft, delayMs);
 }
 
 async function fetchAircraft() {
@@ -119,10 +148,18 @@ async function fetchAircraft() {
     isRefreshing = true;
     const radius = setRadiusValue(radiusSlider.value);
     const url = `https://api.adsb.lol/v2/point/${viewer.lat}/${viewer.lon}/${radius}`;
+    let nextRefreshDelay = DEFAULT_REFRESH_MS;
 
     try {
         const response = await fetch(url);
         if (!response.ok) {
+            if (response.status === 429) {
+                const retryAfterMs = parseRetryAfterHeader(response.headers.get('Retry-After'));
+                nextRefreshDelay = retryAfterMs || RATE_LIMIT_REFRESH_MS;
+                throw new Error('Rate limited by ADSB.lol. Backing off before next refresh.');
+            }
+
+            nextRefreshDelay = ERROR_REFRESH_MS;
             throw new Error(`Request failed with status ${response.status}`);
         }
 
@@ -140,11 +177,12 @@ async function fetchAircraft() {
         setStatus(aircraftMarkers.size);
     } finally {
         isRefreshing = false;
+        scheduleNextRefresh(nextRefreshDelay);
     }
 }
 
 function refreshImmediately() {
-    fetchAircraft();
+    scheduleNextRefresh(0);
 }
 
 function applyViewerLocation(lat, lon, usingDefault = false) {
@@ -187,9 +225,10 @@ radiusNumber.addEventListener('change', () => {
 });
 refreshButton.addEventListener('click', refreshImmediately);
 
-refreshIntervalId = window.setInterval(fetchAircraft, REFRESH_MS);
 window.addEventListener('beforeunload', () => {
-    window.clearInterval(refreshIntervalId);
+    if (refreshTimeoutId) {
+        window.clearTimeout(refreshTimeoutId);
+    }
 });
 
 initLocation();
