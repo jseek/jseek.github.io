@@ -2,6 +2,10 @@ const DEFAULT_LOCATION = { lat: 47.2474269, lon: -122.4639354 };
 const DEFAULT_REFRESH_MS = 15000;
 const ERROR_REFRESH_MS = 30000;
 const RATE_LIMIT_REFRESH_MS = 60000;
+const AIRCRAFT_API_BASE_URLS = [
+    'https://api.adsb.lol',
+    'https://api.airplanes.live'
+];
 
 const locationBanner = document.getElementById('location-banner');
 const radiusSlider = document.getElementById('radius-slider');
@@ -147,25 +151,44 @@ async function fetchAircraft() {
 
     isRefreshing = true;
     const radius = setRadiusValue(radiusSlider.value);
-    const url = `https://api.adsb.lol/v2/point/${viewer.lat}/${viewer.lon}/${radius}`;
     let nextRefreshDelay = DEFAULT_REFRESH_MS;
 
     try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            if (response.status === 429) {
-                const retryAfterMs = parseRetryAfterHeader(response.headers.get('Retry-After'));
-                nextRefreshDelay = retryAfterMs || RATE_LIMIT_REFRESH_MS;
-                throw new Error('Rate limited by ADSB.lol. Backing off before next refresh.');
-            }
+        let data;
+        let successfulSource;
+        const failedSources = [];
 
-            nextRefreshDelay = ERROR_REFRESH_MS;
-            throw new Error(`Request failed with status ${response.status}`);
+        for (const baseUrl of AIRCRAFT_API_BASE_URLS) {
+            const url = `${baseUrl}/v2/point/${viewer.lat}/${viewer.lon}/${radius}`;
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    if (response.status === 429) {
+                        const retryAfterMs = parseRetryAfterHeader(response.headers.get('Retry-After'));
+                        nextRefreshDelay = retryAfterMs || RATE_LIMIT_REFRESH_MS;
+                        throw new Error('Rate limited by ADSB API. Backing off before next refresh.');
+                    }
+
+                    throw new Error(`Request failed with status ${response.status}`);
+                }
+
+                data = await response.json();
+                successfulSource = baseUrl;
+                break;
+            } catch (sourceError) {
+                failedSources.push(`${baseUrl}: ${sourceError.message}`);
+            }
         }
 
-        const data = await response.json();
+        if (!data) {
+            nextRefreshDelay = ERROR_REFRESH_MS;
+            throw new Error(`All aircraft sources failed (${failedSources.join(' | ')})`);
+        }
+
         if (data.msg !== 'No error') {
-            errorLine.textContent = `API message: ${data.msg}`;
+            const sourceName = successfulSource?.replace('https://', '') || 'aircraft API';
+            errorLine.textContent = `API message from ${sourceName}: ${data.msg}`;
         } else {
             errorLine.textContent = '';
         }
