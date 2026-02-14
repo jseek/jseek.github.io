@@ -14,11 +14,7 @@ const refreshButton = document.getElementById('refresh-button');
 const statusLine = document.getElementById('status-line');
 const errorLine = document.getElementById('error-line');
 
-const map = L.map('map');
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-}).addTo(map);
+const map = L.map('map', { zoomControl: false, preferCanvas: true });
 
 const viewerIcon = L.divIcon({ className: 'viewer-dot', iconSize: [14, 14], iconAnchor: [7, 7] });
 
@@ -26,18 +22,42 @@ let viewer = { ...DEFAULT_LOCATION };
 let refreshTimeoutId;
 let isRefreshing = false;
 let hasFittedBounds = false;
+const rangeRings = [];
 
 const aircraftMarkers = new Map();
 const viewerMarker = L.marker([viewer.lat, viewer.lon], { icon: viewerIcon }).addTo(map);
 const radiusCircle = L.circle([viewer.lat, viewer.lon], {
     radius: Number(radiusSlider.value) * 1609.34,
-    color: '#16a34a',
-    fillColor: '#86efac',
-    fillOpacity: 0.15
+    color: '#7efc8d',
+    weight: 1.2,
+    dashArray: '6 8',
+    fillColor: '#73ff95',
+    fillOpacity: 0.02
 }).addTo(map);
 
-viewerMarker.bindPopup('You are here');
+viewerMarker.bindPopup('Radar center');
 map.setView([viewer.lat, viewer.lon], 10);
+
+function updateRangeRings(radiusMiles) {
+    for (const ring of rangeRings) {
+        map.removeLayer(ring);
+    }
+    rangeRings.length = 0;
+
+    for (let step = 1; step <= 3; step += 1) {
+        const ring = L.circle([viewer.lat, viewer.lon], {
+            radius: (radiusMiles * 1609.34 * step) / 3,
+            color: '#4d87ff',
+            weight: 0.8,
+            dashArray: '2 8',
+            opacity: 0.55,
+            fill: false,
+            interactive: false
+        }).addTo(map);
+
+        rangeRings.push(ring);
+    }
+}
 
 function setRadiusValue(nextValue) {
     const parsed = Number(nextValue);
@@ -45,11 +65,21 @@ function setRadiusValue(nextValue) {
     radiusSlider.value = String(clamped);
     radiusNumber.value = String(clamped);
     radiusCircle.setRadius(clamped * 1609.34);
+    updateRangeRings(clamped);
     return clamped;
 }
 
 function formatMaybeNumber(value) {
     return Number.isFinite(value) ? value : 'N/A';
+}
+
+function escapeHtml(value) {
+    return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
 }
 
 function buildPopup(ac) {
@@ -66,6 +96,23 @@ function buildPopup(ac) {
         Track: ${formatMaybeNumber(ac.track)}&deg;<br>
         Distance/Bearing: ${formatMaybeNumber(ac.dst)} mi / ${formatMaybeNumber(ac.dir)}&deg;
     `;
+}
+
+function buildAircraftLabel(ac) {
+    const flight = escapeHtml((ac.flight || ac.hex || 'UNK').trim());
+    const altitude = formatMaybeNumber(ac.alt_baro);
+    const speed = formatMaybeNumber(ac.gs);
+    return `${flight}<br>${altitude} ${Number.isFinite(ac.vs) && ac.vs > 0 ? '↗' : Number.isFinite(ac.vs) && ac.vs < 0 ? '↘' : '-'}<br>${speed}KT`;
+}
+
+function createAircraftIcon(track = 0) {
+    const heading = Number.isFinite(track) ? track : 0;
+    return L.divIcon({
+        className: 'aircraft-icon-wrapper',
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
+        html: `<div class="aircraft-icon" style="--heading:${heading}deg"><span class="vector"></span><span class="symbol"></span></div>`
+    });
 }
 
 function updateMapBounds() {
@@ -93,10 +140,18 @@ function updateAircraftMarkers(aircraft = []) {
         let marker = aircraftMarkers.get(ac.hex);
 
         if (!marker) {
-            marker = L.marker(latlng).addTo(map);
+            marker = L.marker(latlng, { icon: createAircraftIcon(ac.track) }).addTo(map);
+            marker.bindTooltip(buildAircraftLabel(ac), {
+                permanent: true,
+                direction: 'right',
+                offset: [14, 0],
+                className: 'radar-tooltip'
+            });
             aircraftMarkers.set(ac.hex, marker);
         } else {
             marker.setLatLng(latlng);
+            marker.setIcon(createAircraftIcon(ac.track));
+            marker.setTooltipContent(buildAircraftLabel(ac));
         }
 
         marker.bindPopup(buildPopup(ac));
@@ -114,7 +169,7 @@ function updateAircraftMarkers(aircraft = []) {
 
 function setStatus(total, now) {
     const timestamp = now ? new Date(now) : new Date();
-    statusLine.textContent = `Last updated: ${timestamp.toLocaleTimeString()} • Aircraft: ${total} • Auto-refresh: 15s`;
+    statusLine.textContent = `Last sweep: ${timestamp.toLocaleTimeString()} • Targets: ${total} • Auto-refresh: 15s`;
 }
 
 function parseRetryAfterHeader(value) {
@@ -212,9 +267,10 @@ function applyViewerLocation(lat, lon, usingDefault = false) {
     viewer = { lat, lon };
     viewerMarker.setLatLng([lat, lon]);
     radiusCircle.setLatLng([lat, lon]);
+    updateRangeRings(Number(radiusSlider.value));
     locationBanner.textContent = usingDefault
-        ? 'Using default location (permission denied)'
-        : 'Using your location';
+        ? 'Radar source: default location (permission denied)'
+        : 'Radar source: your location';
 }
 
 function initLocation() {
@@ -254,4 +310,5 @@ window.addEventListener('beforeunload', () => {
     }
 });
 
+setRadiusValue(radiusSlider.value);
 initLocation();
