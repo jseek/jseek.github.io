@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nearby Aircraft Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <link rel="stylesheet" href="planes.css">
+</head>
+<body>
+    <main class="container">
+        <h1>Nearby Aircraft</h1>
+        <p class="subtitle">Live aircraft positions from ADSB.lol near your location.</p>
+
+        <div id="location-banner" class="banner">Requesting your location…</div>
+
+        <section class="controls" aria-label="Map controls">
+            <label for="radius-slider">Radius (miles)</label>
+            <input id="radius-slider" type="range" min="1" max="50" value="5">
+            <input id="radius-number" type="number" min="1" max="50" value="5" aria-label="Radius in miles">
+            <button id="refresh-button" type="button">Refresh now</button>
+        </section>
+
+        <p id="status-line" class="status">Waiting for first update…</p>
+        <p id="error-line" class="error" aria-live="polite"></p>
+
+        <div id="map" role="region" aria-label="Aircraft map"></div>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script type="module" src="planes.js"></script>
+</body>
+</html>
