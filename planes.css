@@ -1,5 +1,10 @@
 :root {
-    color-scheme: light;
+    color-scheme: dark;
+    --radar-bg: #020814;
+    --radar-panel: #031428;
+    --radar-green: #53ff6e;
+    --radar-green-soft: rgba(83, 255, 110, 0.4);
+    --radar-grid: rgba(64, 130, 255, 0.18);
 }
 
 * {
@@ -8,23 +13,25 @@
 
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f3f4f6;
-    color: #1f2937;
+    font-family: "Courier New", monospace;
+    background: radial-gradient(circle at center, #041125 0%, #020611 68%, #01030a 100%);
+    color: var(--radar-green);
 }
 
 .container {
-    width: min(1100px, 94vw);
-    margin: 1.25rem auto;
+    width: min(1180px, 95vw);
+    margin: 1rem auto 1.5rem;
 }
 
 h1 {
     margin-bottom: 0.3rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 .subtitle {
     margin-top: 0;
-    color: #4b5563;
+    color: rgba(139, 255, 170, 0.85);
 }
 
 .banner {
@@ -33,63 +40,162 @@ h1 {
     padding: 0.4rem 0.75rem;
     border-radius: 999px;
     font-size: 0.9rem;
-    background: #e5e7eb;
+    border: 1px solid var(--radar-green-soft);
+    background: rgba(6, 30, 19, 0.72);
 }
 
 .controls {
     display: grid;
-    grid-template-columns: auto 1fr 80px auto;
+    grid-template-columns: auto 1fr 90px auto;
     align-items: center;
     gap: 0.75rem;
-    background: #fff;
-    border-radius: 8px;
+    background: var(--radar-panel);
+    border-radius: 10px;
     padding: 0.75rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(83, 255, 110, 0.24);
+    box-shadow: 0 0 24px rgba(83, 255, 110, 0.15);
+}
+
+#radius-slider,
+#radius-number,
+button {
+    accent-color: var(--radar-green);
+    background: rgba(6, 26, 42, 0.9);
+    color: var(--radar-green);
+    border: 1px solid rgba(83, 255, 110, 0.38);
+    border-radius: 6px;
 }
 
 #radius-number {
     width: 100%;
+    padding: 0.35rem;
 }
 
 button {
-    border: none;
-    background: #2563eb;
-    color: white;
     padding: 0.5rem 0.8rem;
-    border-radius: 6px;
     cursor: pointer;
+    font-family: inherit;
+    text-transform: uppercase;
 }
 
 button:hover {
-    background: #1d4ed8;
+    background: rgba(19, 61, 34, 0.9);
 }
 
 .status,
 .error {
     margin: 0.8rem 0 0;
     font-size: 0.95rem;
+    text-shadow: 0 0 10px rgba(83, 255, 110, 0.25);
 }
 
 .error {
-    color: #b91c1c;
+    color: #ff8ea1;
     min-height: 1.2em;
 }
 
 #map {
+    position: relative;
+    isolation: isolate;
     height: 72vh;
-    min-height: 420px;
+    min-height: 450px;
     margin-top: 0.8rem;
-    border-radius: 8px;
+    border-radius: 10px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    border: 1px solid rgba(83, 255, 110, 0.4);
+    box-shadow: 0 0 28px rgba(83, 255, 110, 0.25);
+    background:
+        radial-gradient(circle at center, rgba(11, 53, 34, 0.68), rgba(2, 9, 20, 0.97) 64%),
+        repeating-radial-gradient(circle at center, transparent 0 9.7%, rgba(83, 255, 110, 0.1) 10% 10.2%),
+        repeating-linear-gradient(0deg, transparent 0 39px, var(--radar-grid) 40px),
+        repeating-linear-gradient(90deg, transparent 0 39px, var(--radar-grid) 40px);
+}
+
+#map::before {
+    content: "";
+    position: absolute;
+    inset: -55% -55%;
+    background: conic-gradient(from 25deg, rgba(112, 255, 152, 0) 0deg, rgba(112, 255, 152, 0.58) 18deg, rgba(112, 255, 152, 0) 38deg);
+    animation: radar-sweep 6.8s linear infinite;
+    transform-origin: center;
+    pointer-events: none;
+    z-index: 401;
+    mix-blend-mode: screen;
+}
+
+#map::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, transparent 48%, rgba(2, 9, 20, 0.75) 100%);
+    pointer-events: none;
+    z-index: 402;
+}
+
+@keyframes radar-sweep {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.leaflet-pane,
+.leaflet-top,
+.leaflet-bottom,
+.leaflet-control-container {
+    z-index: 450;
+}
+
+.leaflet-tooltip.radar-tooltip {
+    background: transparent;
+    border: none;
+    color: var(--radar-green);
+    font-family: "Courier New", monospace;
+    font-weight: 700;
+    font-size: 0.82rem;
+    line-height: 1.2;
+    text-shadow: 0 0 10px rgba(83, 255, 110, 0.62);
+    box-shadow: none;
+}
+
+.leaflet-tooltip-left.radar-tooltip::before,
+.leaflet-tooltip-right.radar-tooltip::before {
+    border: none;
 }
 
 .viewer-dot {
-    background: #16a34a;
-    border: 2px solid white;
-    border-radius: 50%;
     width: 14px;
     height: 14px;
+    border-radius: 50%;
+    background: #f9ff9e;
+    border: 1px solid #fff;
+    box-shadow: 0 0 14px rgba(239, 255, 115, 0.95);
+}
+
+.aircraft-icon {
+    position: relative;
+    width: 28px;
+    height: 28px;
+}
+
+.aircraft-icon .symbol {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 8px;
+    height: 8px;
+    border: 2px solid var(--radar-green);
+    background: rgba(3, 20, 40, 0.8);
+    box-shadow: 0 0 8px rgba(83, 255, 110, 0.55);
+}
+
+.aircraft-icon .vector {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    width: 2px;
+    height: 26px;
+    background: linear-gradient(var(--radar-green), rgba(83, 255, 110, 0));
+    transform-origin: top center;
+    transform: rotate(var(--heading));
 }
 
 @media (max-width: 720px) {
