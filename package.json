@@ -1,0 +1,11 @@
+{
+  "name": "jseek-github-io",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "screenshot": "node scripts/screenshot.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.52.0"
+  }
+}
