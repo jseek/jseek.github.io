@@ -18,9 +18,16 @@
     <header class="top-bar">
       <div>
         <h1>Late for the Train</h1>
-        <div class="subtitle">Next arrival at <span id="station-code">FLG</span></div>
+        <div class="subtitle"><span id="context-label">Next arrival at</span> <span id="station-code">FLG</span></div>
       </div>
       <div class="controls">
+        <label class="control">
+          View
+          <select id="view-mode-select">
+            <option value="station">Station</option>
+            <option value="train">Train</option>
+          </select>
+        </label>
         <label class="control">
           Display
           <select id="display-select">
@@ -39,6 +46,10 @@
         <label class="control">
           Station
           <input id="station-input" maxlength="4" placeholder="FLG" />
+        </label>
+        <label class="control is-hidden" id="train-select-control">
+          Train
+          <select id="train-select"></select>
         </label>
         <button id="apply-station" class="button">Update</button>
         <button id="toggle-night" class="button">Night mode</button>

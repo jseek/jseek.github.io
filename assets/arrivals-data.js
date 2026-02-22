@@ -118,15 +118,18 @@ function buildStationLookup(stations) {
   return lookup;
 }
 
+function normalizeTrainNumber(train) {
+  return String(train?.trainNum || train?.trainID || "").trim();
+}
+
 function selectStationArrivals(trains, station, now, stationLookup) {
   const arrivals = [];
   const graceWindowMs = 15 * 60 * 1000;
   const delayThresholdMs = 5 * 60 * 1000;
-  const normalizedStation = station.toUpperCase();
 
   trains.forEach((train) => {
     const stations = Array.isArray(train.stations) ? train.stations : [];
-    const stationStop = stations.find((item) => item.code === station);
+    const stationStop = stations.find((item) => (item.code || "").toUpperCase() === station.toUpperCase());
     if (!stationStop) {
       return;
     }
@@ -146,35 +149,25 @@ function selectStationArrivals(trains, station, now, stationLookup) {
     }
 
     let statusMsg = train.statusMsg || stationStop.status;
-    const statusClean = (statusMsg || "").trim();
     if (scheduledArrival) {
       if (actualArrival && actualArrival - scheduledArrival >= delayThresholdMs) {
         statusMsg = "Delayed";
       } else if (!actualArrival && now.getTime() > scheduledArrival.getTime() + delayThresholdMs) {
         statusMsg = "Delayed";
-      } else if (!statusClean) {
-        const lowerStatus = (stationStop.status || "").toLowerCase();
-        if (lowerStatus.includes("station")) {
-          statusMsg = "Boarding";
-        } else if (lowerStatus.includes("enroute") || lowerStatus.includes("en route")) {
-          statusMsg = "On time";
-        } else if (lowerStatus.includes("departed")) {
-          statusMsg = "Departed";
-        } else {
-          statusMsg = "On time";
-        }
+      } else if (!statusMsg?.trim()) {
+        statusMsg = "On time";
       }
     }
 
     const trainLocation = getCoordinates(train);
-    const lookupEntry = stationLookup?.get(normalizedStation);
+    const lookupEntry = stationLookup?.get(station.toUpperCase());
     const stationLocation = lookupEntry?.coords || getCoordinates(stationStop);
     const stationName = lookupEntry?.name || stationStop.name || "";
 
     arrivals.push({
       station_code: station,
       station_name: stationName,
-      trainNum: String(train.trainNum || train.trainID || ""),
+      trainNum: normalizeTrainNumber(train),
       routeName: train.routeName || train.route || "",
       origin: {
         name: train.origName || train.origin || "",
@@ -194,6 +187,51 @@ function selectStationArrivals(trains, station, now, stationLookup) {
   });
 
   return arrivals.sort((a, b) => new Date(a.arrivalTime) - new Date(b.arrivalTime));
+}
+
+function selectUpcomingStops(train, now, stationLookup) {
+  const stops = [];
+  const graceWindowMs = 10 * 60 * 1000;
+  const stations = Array.isArray(train.stations) ? train.stations : [];
+
+  stations.forEach((stop, index) => {
+    const status = (stop.status || "").toLowerCase();
+    if (status.includes("departed") || status.includes("completed")) {
+      return;
+    }
+    const { time: arrivalTime, source: timeSource } = chooseArrivalTime(stop);
+    if (!arrivalTime || arrivalTime.getTime() < now.getTime() - graceWindowMs) {
+      return;
+    }
+
+    const stationCode = (stop.code || "").toUpperCase();
+    const stationLookupEntry = stationLookup.get(stationCode);
+    const previousStop = stations[index - 1] || null;
+    const previousName = previousStop?.name || previousStop?.code || train.origName || train.origCode || "";
+
+    stops.push({
+      station_code: stationCode,
+      station_name: stationLookupEntry?.name || stop.name || stationCode,
+      trainNum: normalizeTrainNumber(train),
+      routeName: train.routeName || train.route || "",
+      origin: {
+        name: previousName,
+        code: previousStop?.code || "",
+      },
+      destination: {
+        name: stationLookupEntry?.name || stop.name || stationCode,
+        code: stationCode,
+      },
+      arrivalTime: arrivalTime.toISOString(),
+      etaMinutes: computeEtaMinutes(arrivalTime, now),
+      statusMsg: stop.status || train.statusMsg || "On time",
+      timeSource,
+      trainLocation: getCoordinates(train),
+      stationLocation: stationLookupEntry?.coords || getCoordinates(stop),
+    });
+  });
+
+  return stops.sort((a, b) => new Date(a.arrivalTime) - new Date(b.arrivalTime));
 }
 
 async function fetchStaleFlag() {
@@ -244,7 +282,27 @@ export async function fetchStationLocations() {
     .filter(Boolean);
 }
 
-export async function fetchArrivalsData(stationCode) {
+export async function fetchTrainsList() {
+  const payload = await fetchTrainsPayload();
+  const trains = normalizeTrainsPayload(payload);
+  return trains
+    .map((train) => {
+      const trainNum = normalizeTrainNumber(train);
+      const coords = getCoordinates(train);
+      if (!trainNum || !coords) {
+        return null;
+      }
+      return {
+        trainNum,
+        routeName: train.routeName || train.route || "",
+        label: `${train.routeName || "Train"} ${trainNum}`.trim(),
+        coords,
+      };
+    })
+    .filter(Boolean);
+}
+
+export async function fetchArrivalsData({ stationCode, trainNum, mode = "station" }) {
   const [payload, stale, stationsPayload] = await Promise.all([
     fetchTrainsPayload(),
     fetchStaleFlag(),
@@ -254,11 +312,35 @@ export async function fetchArrivalsData(stationCode) {
   const stations = normalizeStationsPayload(stationsPayload);
   const stationLookup = buildStationLookup(stations);
   const now = new Date();
+
+  if (mode === "train") {
+    const selectedTrain = trains.find((item) => normalizeTrainNumber(item) === String(trainNum || ""));
+    const upcoming = selectedTrain ? selectUpcomingStops(selectedTrain, now, stationLookup) : [];
+    const nextTrain = upcoming[0] || null;
+    return {
+      mode,
+      station_code: stationCode || "",
+      train_num: trainNum || "",
+      context_code: trainNum || "",
+      context_label: "Train",
+      now_utc: now.toISOString(),
+      next_train: nextTrain,
+      upcoming_trains: upcoming.slice(0, 8),
+      last_updated_utc: now.toISOString(),
+      data_source: "amtraker_v3_unofficial",
+      stale,
+      now,
+    };
+  }
+
   const arrivals = selectStationArrivals(trains, stationCode, now, stationLookup);
   const nextTrain = arrivals[0] || null;
 
   return {
+    mode,
     station_code: stationCode,
+    context_code: stationCode,
+    context_label: "Next arrival at",
     now_utc: now.toISOString(),
     next_train: nextTrain,
     upcoming_trains: arrivals.slice(0, 8),
