@@ -141,8 +141,8 @@ function updateUrl() {
 function syncViewControls() {
   const stationControlsVisible = viewMode === "station";
   stationInput.closest("label")?.classList.toggle("is-hidden", !stationControlsVisible);
-  applyStationBtn.classList.toggle("is-hidden", !stationControlsVisible);
   trainSelectControl.classList.toggle("is-hidden", stationControlsVisible);
+  applyStationBtn.textContent = stationControlsVisible ? "Update" : "Update train";
   contextLabelEl.textContent = stationControlsVisible ? "Next arrival at" : "Next stop for";
   if (upcomingHeadingEl) {
     upcomingHeadingEl.textContent = stationControlsVisible ? "Upcoming arrivals" : "Upcoming stations";
@@ -274,6 +274,11 @@ async function loadTrainOptions() {
 }
 
 applyStationBtn.addEventListener("click", () => {
+  if (viewMode === "train") {
+    setTrain(trainSelect.value, { fetch: true });
+    return;
+  }
+
   const inputValue = stationInput.value.trim().toUpperCase();
   if (inputValue) {
     setStation(inputValue, { fetch: true });
