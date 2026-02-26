@@ -6,17 +6,30 @@
     <title>Joshua Seek | Analytics Engineer</title>
     <link rel="stylesheet" href="styles.css">
 
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-GCMFJBGWVS"></script>
+<!-- Analytics are disabled on local previews to keep automated screenshots deterministic. -->
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+  (function () {
+    var host = window.location.hostname;
+    var isLocal = host === 'localhost' || host === '127.0.0.1' || host === '::1' || window.location.protocol === 'file:';
+    if (isLocal) return;
 
-  gtag('config', 'G-GCMFJBGWVS');
+    var gtagScript = document.createElement('script');
+    gtagScript.async = true;
+    gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-GCMFJBGWVS';
+    document.head.appendChild(gtagScript);
+
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function(){window.dataLayer.push(arguments);};
+    window.gtag('js', new Date());
+    window.gtag('config', 'G-GCMFJBGWVS');
+
+    var goatCounterScript = document.createElement('script');
+    goatCounterScript.setAttribute('data-goatcounter', 'https://joshuaseek.goatcounter.com/count');
+    goatCounterScript.async = true;
+    goatCounterScript.src = '//gc.zgo.at/count.js';
+    document.head.appendChild(goatCounterScript);
+  })();
 </script>
-
-  <script data-goatcounter="https://joshuaseek.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
     <header>
