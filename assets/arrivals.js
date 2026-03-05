@@ -30,6 +30,7 @@ const upcomingListEl = document.getElementById("upcoming-list");
 const splitListEl = document.getElementById("split-list");
 const refreshTimeEl = document.getElementById("refresh-time");
 const staleIndicatorEl = document.getElementById("stale-indicator");
+const footerEl = document.querySelector(".footer");
 
 const renderer = initArrivalsRenderer({
   stationCodeEl,
@@ -146,10 +147,14 @@ function syncViewControls() {
   applyStationBtn.textContent = stationControlsVisible ? "Update" : "Update train";
   contextLabelEl.textContent = stationControlsVisible ? "Next arrival at" : "Next stop for";
   if (upcomingHeadingEl) {
-    upcomingHeadingEl.textContent = stationControlsVisible ? "Upcoming arrivals" : "Upcoming stations";
+    upcomingHeadingEl.classList.toggle("is-hidden", !stationControlsVisible);
+    upcomingHeadingEl.textContent = "Upcoming arrivals";
   }
   if (splitHeadingEl) {
-    splitHeadingEl.textContent = stationControlsVisible ? "Arrivals" : "Upcoming stations";
+    splitHeadingEl.textContent = "Arrivals";
+  }
+  if (footerEl) {
+    footerEl.classList.toggle("is-hidden", !stationControlsVisible);
   }
 }
 
