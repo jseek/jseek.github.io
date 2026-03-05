@@ -193,7 +193,7 @@ async function fetchData(options = {}) {
     renderer.setStationCode(data.context_code || stationCode);
     contextLabelEl.textContent = data.context_label || contextLabelEl.textContent;
     renderer.renderHero(data.next_train);
-    renderer.renderUpcoming(data.upcoming_trains || []);
+    renderer.renderUpcoming(data.upcoming_trains || [], { mode: viewMode, nextTrain: data.next_train });
     renderer.renderSplitFlap(buildSplitTrains(data), options.forceSplit === true);
     renderer.renderRefreshTime(data.now);
     renderer.renderStale(data.stale);
