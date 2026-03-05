@@ -357,15 +357,26 @@ export function initArrivalsRenderer(elements) {
 
     const nextStationName = nextStop?.station_name || nextStop?.station_code || "next station";
     const previousStationName = nextStop?.origin?.name || nextStop?.origin?.code || "Unknown";
+    const currentTrainName = `${nextStop?.routeName || "Train"} ${nextStop?.trainNum || ""}`.trim();
+
+    const previous = document.createElement("div");
+    previous.className = "timeline-stop timeline-previous";
+    previous.innerHTML = `
+      <div class="timeline-node-wrap"><span class="timeline-node" aria-hidden="true"></span></div>
+      <div class="timeline-content">
+        <div class="timeline-title">${previousStationName}</div>
+        <div class="timeline-subtitle">Previous station</div>
+      </div>
+    `;
+    timeline.appendChild(previous);
 
     const current = document.createElement("div");
     current.className = "timeline-current";
     current.innerHTML = `
       <div class="timeline-node-wrap"><span class="timeline-node timeline-node-live" aria-hidden="true"></span></div>
       <div class="timeline-content">
-        <div class="timeline-title">Current position</div>
+        <div class="timeline-title">${currentTrainName}</div>
         <div class="timeline-subtitle">${nextStop ? `${formatEta(nextStop.etaMinutes)} to ${nextStationName}` : "No next station available"}</div>
-        <div class="timeline-meta">Previous station: ${previousStationName}</div>
       </div>
     `;
     timeline.appendChild(current);
