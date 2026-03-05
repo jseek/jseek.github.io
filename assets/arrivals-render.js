@@ -351,12 +351,65 @@ export function initArrivalsRenderer(elements) {
     });
   }
 
-  function renderUpcoming(trains) {
+  function renderTrainTimeline(stops, nextStop) {
+    const timeline = document.createElement("div");
+    timeline.className = "train-timeline";
+
+    const nextStationName = nextStop?.station_name || nextStop?.station_code || "next station";
+    const previousStationName = nextStop?.origin?.name || nextStop?.origin?.code || "Unknown";
+
+    const current = document.createElement("div");
+    current.className = "timeline-current";
+    current.innerHTML = `
+      <div class="timeline-node-wrap"><span class="timeline-node timeline-node-live" aria-hidden="true"></span></div>
+      <div class="timeline-content">
+        <div class="timeline-title">Current position</div>
+        <div class="timeline-subtitle">${nextStop ? `${formatEta(nextStop.etaMinutes)} to ${nextStationName}` : "No next station available"}</div>
+        <div class="timeline-meta">Previous station: ${previousStationName}</div>
+      </div>
+    `;
+    timeline.appendChild(current);
+
+    const list = document.createElement("div");
+    list.className = "timeline-list";
+
+    stops.forEach((stop, index) => {
+      const row = document.createElement("div");
+      row.className = "timeline-stop";
+      if (index === 0) {
+        row.classList.add("is-next");
+      }
+      row.innerHTML = `
+        <div class="timeline-node-wrap"><span class="timeline-node" aria-hidden="true"></span></div>
+        <div class="timeline-content">
+          <div class="timeline-title">${stop.station_name || stop.station_code || "Unknown station"}</div>
+          <div class="timeline-subtitle">${formatEta(stop.etaMinutes)} • ${formatTime(stop.arrivalTime)}</div>
+        </div>
+      `;
+      list.appendChild(row);
+    });
+
+    timeline.appendChild(list);
+    upcomingListEl.appendChild(timeline);
+  }
+
+  function renderUpcoming(trains, context = {}) {
+    const { mode = "station", nextTrain = null } = context;
     if (!upcomingListEl) {
       return;
     }
     teardownMaps();
     upcomingListEl.innerHTML = "";
+
+    if (mode === "train") {
+      if (!trains.length) {
+        upcomingListEl.innerHTML = '<div class="upcoming-card">No upcoming stations found.</div>';
+        return;
+      }
+      renderTrainTimeline(trains, nextTrain || trains[0] || null);
+      return;
+    }
+
     if (!trains.length) {
       upcomingListEl.innerHTML = '<div class="upcoming-card">No upcoming arrivals found.</div>';
       return;
