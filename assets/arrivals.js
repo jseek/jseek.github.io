@@ -72,7 +72,8 @@ function applyNightMode(enabled) {
 
 function applyDisplayType(value) {
   const isSplit = value === "split";
-  heroSection.classList.toggle("is-hidden", isSplit);
+  const showHero = !isSplit && viewMode === "station";
+  heroSection.classList.toggle("is-hidden", !showHero);
   upcomingSection.classList.toggle("is-hidden", isSplit);
   splitSection.classList.toggle("is-hidden", !isSplit);
 }
@@ -177,6 +178,7 @@ function setTrain(newTrainNumber, options = {}) {
 function setViewMode(mode, options = {}) {
   viewMode = mode;
   syncViewControls();
+  applyDisplayType(displayType);
   updateUrl();
   if (options.fetch) {
     fetchData({ forceSplit: true });
