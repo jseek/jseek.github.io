@@ -248,16 +248,19 @@ body {
   font-size: 1rem;
 }
 
-.upcoming-card .train-map {
+.train-map {
   display: block;
   width: 100%;
-  grid-column: 1 / -1;
   height: 220px;
   min-height: 220px;
   border-radius: 16px;
   overflow: hidden;
   border: 1px solid var(--card-border);
   margin-top: 8px;
+}
+
+.upcoming-card .train-map {
+  grid-column: 1 / -1;
 }
 
 .upcoming-card .train-map.map-unavailable {
