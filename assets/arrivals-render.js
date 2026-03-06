@@ -370,16 +370,46 @@ export function initArrivalsRenderer(elements) {
     `;
     timeline.appendChild(previous);
 
-    const current = document.createElement("div");
+    const current = document.createElement("button");
+    current.type = "button";
     current.className = "timeline-current";
+    current.setAttribute("aria-expanded", "false");
+    const detailsId = `train-position-${nextStop?.trainNum || "current"}-${Date.now()}`;
+    current.setAttribute("aria-controls", detailsId);
     current.innerHTML = `
       <div class="timeline-node-wrap"><span class="timeline-node timeline-node-live" aria-hidden="true"></span></div>
       <div class="timeline-content">
         <div class="timeline-title">${currentTrainName}</div>
         <div class="timeline-subtitle">${nextStop ? `${formatEta(nextStop.etaMinutes)} to ${nextStationName}` : "No next station available"}</div>
+        <div class="timeline-meta">Tap to view current position on map</div>
       </div>
     `;
     timeline.appendChild(current);
+
+    const mapPanel = document.createElement("div");
+    mapPanel.className = "timeline-map-panel";
+    mapPanel.id = detailsId;
+    mapPanel.hidden = true;
+
+    const mapEl = document.createElement("div");
+    mapEl.className = "train-map";
+    mapPanel.appendChild(mapEl);
+
+    const mapAttribution = document.createElement("div");
+    mapAttribution.className = "map-attribution";
+    mapAttribution.textContent = mapAttributionText(mapStyle);
+    mapPanel.appendChild(mapAttribution);
+
+    current.addEventListener("click", () => {
+      const isExpanded = current.classList.toggle("is-expanded");
+      current.setAttribute("aria-expanded", String(isExpanded));
+      mapPanel.hidden = !isExpanded;
+      if (isExpanded && !mapEl.dataset.mapReady) {
+        requestAnimationFrame(() => {
+          initMap(mapEl, nextStop, mapAttribution);
+        });
+      }
+    });
 
     const list = document.createElement("div");
     list.className = "timeline-list";
@@ -401,6 +431,7 @@ export function initArrivalsRenderer(elements) {
     });
 
     timeline.appendChild(list);
+    timeline.appendChild(mapPanel);
     upcomingListEl.appendChild(timeline);
   }
 
