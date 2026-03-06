@@ -248,16 +248,19 @@ body {
   font-size: 1rem;
 }
 
-.upcoming-card .train-map {
+.train-map {
   display: block;
   width: 100%;
-  grid-column: 1 / -1;
   height: 220px;
   min-height: 220px;
   border-radius: 16px;
   overflow: hidden;
   border: 1px solid var(--card-border);
   margin-top: 8px;
+}
+
+.upcoming-card .train-map {
+  grid-column: 1 / -1;
 }
 
 .upcoming-card .train-map.map-unavailable {
@@ -337,15 +340,6 @@ body {
   outline-offset: 2px;
 }
 
-.timeline-current .timeline-meta {
-  transition: color 0.2s ease;
-}
-
-.timeline-current.is-expanded .timeline-meta,
-.timeline-current:hover .timeline-meta {
-  color: var(--accent);
-}
-
 .timeline-map-panel {
   display: grid;
   gap: 8px;
@@ -423,13 +417,6 @@ body {
 .timeline-subtitle {
   color: var(--muted);
   font-size: 0.95rem;
-}
-
-.timeline-meta {
-  color: var(--muted);
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
 }
 
 .timeline-stop.is-next .timeline-title {
