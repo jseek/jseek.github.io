@@ -340,15 +340,6 @@ body {
   outline-offset: 2px;
 }
 
-.timeline-current .timeline-meta {
-  transition: color 0.2s ease;
-}
-
-.timeline-current.is-expanded .timeline-meta,
-.timeline-current:hover .timeline-meta {
-  color: var(--accent);
-}
-
 .timeline-map-panel {
   display: grid;
   gap: 8px;
@@ -426,13 +417,6 @@ body {
 .timeline-subtitle {
   color: var(--muted);
   font-size: 0.95rem;
-}
-
-.timeline-meta {
-  color: var(--muted);
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
 }
 
 .timeline-stop.is-next .timeline-title {

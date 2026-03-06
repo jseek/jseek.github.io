@@ -172,7 +172,7 @@ export function initArrivalsRenderer(elements) {
     mapEl.dataset.mapReady = "true";
   }
 
-  function initMap(mapEl, train, attributionEl) {
+  function initMap(mapEl, train, attributionEl, options = {}) {
     if (!window.L) {
       renderMapFallback(mapEl, "Map unavailable: map library failed to load.");
       return;
@@ -181,6 +181,7 @@ export function initArrivalsRenderer(elements) {
       renderMapFallback(mapEl, "Map unavailable: missing train location data.");
       return;
     }
+    const appliedStyle = options.styleOverride || mapStyle;
     const trainLabel = formatMapLabel(train.trainNum);
     const trainCoords = [train.trainLocation.lat, train.trainLocation.lon];
     const hasStationLocation = Boolean(train.stationLocation);
@@ -200,7 +201,7 @@ export function initArrivalsRenderer(elements) {
       keyboard: false,
       tap: false,
     });
-    const tileLayer = createTileLayer(mapStyle).addTo(map);
+    const tileLayer = createTileLayer(appliedStyle).addTo(map);
     L.marker(trainCoords, {
       icon: L.divIcon({
         className: "map-label map-label-train",
@@ -222,9 +223,9 @@ export function initArrivalsRenderer(elements) {
       map.setView(trainCoords, 7, { animate: false });
     }
     if (attributionEl) {
-      attributionEl.textContent = mapAttributionText(mapStyle);
+      attributionEl.textContent = mapAttributionText(appliedStyle);
     }
-    mapInstances.add({ map, tileLayer, attributionEl });
+    mapInstances.add({ map, tileLayer, attributionEl, styleOverride: options.styleOverride || null });
     mapEl.dataset.mapReady = "true";
   }
 
@@ -381,7 +382,6 @@ export function initArrivalsRenderer(elements) {
       <div class="timeline-content">
         <div class="timeline-title">${currentTrainName}</div>
         <div class="timeline-subtitle">${nextStop ? `${formatEta(nextStop.etaMinutes)} to ${nextStationName}` : "No next station available"}</div>
-        <div class="timeline-meta">Tap to view current position on map</div>
       </div>
     `;
     timeline.appendChild(current);
@@ -397,7 +397,7 @@ export function initArrivalsRenderer(elements) {
 
     const mapAttribution = document.createElement("div");
     mapAttribution.className = "map-attribution";
-    mapAttribution.textContent = mapAttributionText(mapStyle);
+    mapAttribution.textContent = mapAttributionText("dark");
     mapPanel.appendChild(mapAttribution);
 
     current.addEventListener("click", () => {
@@ -406,7 +406,7 @@ export function initArrivalsRenderer(elements) {
       mapPanel.hidden = !isExpanded;
       if (isExpanded && !mapEl.dataset.mapReady) {
         requestAnimationFrame(() => {
-          initMap(mapEl, nextStop, mapAttribution);
+          initMap(mapEl, nextStop, mapAttribution, { styleOverride: "dark" });
         });
       }
     });
@@ -430,8 +430,8 @@ export function initArrivalsRenderer(elements) {
       list.appendChild(row);
     });
 
-    timeline.appendChild(list);
     timeline.appendChild(mapPanel);
+    timeline.appendChild(list);
     upcomingListEl.appendChild(timeline);
   }
 
@@ -576,7 +576,8 @@ export function initArrivalsRenderer(elements) {
     nightMode = enabled;
     mapInstances.forEach((entry) => {
       entry.map.removeLayer(entry.tileLayer);
-      entry.tileLayer = createTileLayer(mapStyle).addTo(entry.map);
+      const effectiveStyle = entry.styleOverride || mapStyle;
+      entry.tileLayer = createTileLayer(effectiveStyle).addTo(entry.map);
     });
   }
 
@@ -584,9 +585,10 @@ export function initArrivalsRenderer(elements) {
     mapStyle = value;
     mapInstances.forEach((entry) => {
       entry.map.removeLayer(entry.tileLayer);
-      entry.tileLayer = createTileLayer(mapStyle).addTo(entry.map);
+      const effectiveStyle = entry.styleOverride || mapStyle;
+      entry.tileLayer = createTileLayer(effectiveStyle).addTo(entry.map);
       if (entry.attributionEl) {
-        entry.attributionEl.textContent = mapAttributionText(mapStyle);
+        entry.attributionEl.textContent = mapAttributionText(effectiveStyle);
       }
     });
   }
