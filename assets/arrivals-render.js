@@ -148,6 +148,25 @@ export function initArrivalsRenderer(elements) {
     });
   }
 
+  function attachTileFallback(map, layer, attributionEl) {
+    let tileErrorCount = 0;
+    let switchedToFallback = false;
+
+    layer.on("tileerror", () => {
+      tileErrorCount += 1;
+      if (switchedToFallback || tileErrorCount < 3) {
+        return;
+      }
+
+      switchedToFallback = true;
+      map.removeLayer(layer);
+      createTileLayer("light").addTo(map);
+      if (attributionEl) {
+        attributionEl.textContent = mapAttributionText("light");
+      }
+    });
+  }
+
   function teardownMaps() {
     mapInstances.forEach((entry) => {
       entry.map.remove();
@@ -202,6 +221,7 @@ export function initArrivalsRenderer(elements) {
       tap: false,
     });
     const tileLayer = createTileLayer(appliedStyle).addTo(map);
+    attachTileFallback(map, tileLayer, attributionEl);
     L.marker(trainCoords, {
       icon: L.divIcon({
         className: "map-label map-label-train",
@@ -225,6 +245,9 @@ export function initArrivalsRenderer(elements) {
     if (attributionEl) {
       attributionEl.textContent = mapAttributionText(appliedStyle);
     }
+    requestAnimationFrame(() => {
+      map.invalidateSize();
+    });
     mapInstances.add({ map, tileLayer, attributionEl, styleOverride: options.styleOverride || null });
     mapEl.dataset.mapReady = "true";
   }
@@ -408,6 +431,13 @@ export function initArrivalsRenderer(elements) {
         requestAnimationFrame(() => {
           initMap(mapEl, nextStop, mapAttribution, { styleOverride: "dark" });
         });
+      } else if (isExpanded) {
+        requestAnimationFrame(() => {
+          const entry = [...mapInstances].find((instance) => instance.map.getContainer() === mapEl);
+          if (entry) {
+            entry.map.invalidateSize();
+          }
+        });
       }
     });
 
@@ -513,6 +543,13 @@ export function initArrivalsRenderer(elements) {
           requestAnimationFrame(() => {
             initMap(mapEl, train, mapAttribution);
           });
+        } else if (isExpanded) {
+          requestAnimationFrame(() => {
+            const entry = [...mapInstances].find((instance) => instance.map.getContainer() === mapEl);
+            if (entry) {
+              entry.map.invalidateSize();
+            }
+          });
         }
       });
 
@@ -578,6 +615,7 @@ export function initArrivalsRenderer(elements) {
       entry.map.removeLayer(entry.tileLayer);
       const effectiveStyle = entry.styleOverride || mapStyle;
       entry.tileLayer = createTileLayer(effectiveStyle).addTo(entry.map);
+      attachTileFallback(entry.map, entry.tileLayer, entry.attributionEl);
     });
   }
 
@@ -587,6 +625,7 @@ export function initArrivalsRenderer(elements) {
       entry.map.removeLayer(entry.tileLayer);
       const effectiveStyle = entry.styleOverride || mapStyle;
       entry.tileLayer = createTileLayer(effectiveStyle).addTo(entry.map);
+      attachTileFallback(entry.map, entry.tileLayer, entry.attributionEl);
       if (entry.attributionEl) {
         entry.attributionEl.textContent = mapAttributionText(effectiveStyle);
       }
