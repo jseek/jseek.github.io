@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AZ VoteLab</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="masthead">
+    <div>
+      <p class="eyebrow">Arizona election data</p>
+      <h1>AZ VoteLab</h1>
+      <p id="election-meta" class="subtitle">Loading election data…</p>
+    </div>
+    <div class="status-pill"><span></span> Published data</div>
+  </header>
+
+  <main>
+    <nav class="mode-switch card" aria-label="Analysis mode">
+      <button id="explore-mode" class="active" type="button">Explore one contest</button>
+      <button id="compare-mode" type="button">Compare two choices</button>
+      <button id="precinct-mode" type="button">Explore by precinct</button>
+    </nav>
+
+    <div id="explore-workspace">
+    <section class="controls card">
+      <label>County
+        <select id="county-select"><option>Loading…</option></select>
+      </label>
+      <label>Contest
+        <select id="contest-select" disabled><option>Select a county</option></select>
+      </label>
+      <label><span id="search-label">Find a precinct</span>
+        <input id="search-input" type="search" placeholder="Name or number" disabled>
+      </label>
+    </section>
+
+    <section id="empty-state" class="empty-state card">
+      <div class="seal">AZ</div>
+      <h2>Choose a county and contest</h2>
+      <p>Explore candidate totals, vote share, winning margins, and voting-method breakdowns for every reporting precinct.</p>
+    </section>
+
+    <section id="dashboard" class="dashboard hidden">
+      <div class="summary-grid">
+        <article class="metric card"><p>Contest votes</p><strong id="total-votes">—</strong><small>Sum of candidate votes</small></article>
+        <article class="metric card"><p id="geography-count-label">Precincts</p><strong id="precinct-count">—</strong><small id="filtered-count">Reporting in this contest</small></article>
+        <article class="metric card leader-card"><p>Leading candidate</p><strong id="leader-name">—</strong><small id="leader-share">—</small></article>
+      </div>
+
+      <section class="candidate-card card">
+        <div class="section-heading">
+          <div><p class="eyebrow">Countywide result</p><h2 id="contest-title">Contest</h2></div>
+          <button id="download-button" type="button">Download CSV</button>
+        </div>
+        <div id="candidate-bars" class="candidate-bars"></div>
+      </section>
+
+      <section id="contest-map-card" class="visual-card card hidden">
+        <div class="section-heading"><div><p class="eyebrow">Geographic result</p><h2 id="contest-map-heading">Precinct winner map</h2></div><div id="explore-resolution" class="map-resolution hidden"><button id="explore-counties" class="active" type="button">Counties</button><button id="explore-precincts" type="button">Precincts</button></div></div>
+        <p id="contest-map-note" class="visual-note">Precinct boundaries are overlaid on a street map. Click a precinct for its detailed result.</p>
+        <div id="contest-map-legend" class="map-legend"></div>
+        <div id="contest-map" class="leaflet-map" role="region" aria-label="Contest results by precinct"></div>
+      </section>
+
+      <section class="table-card card">
+        <div class="section-heading table-heading">
+          <div><p class="eyebrow">Geographic detail</p><h2 id="results-table-title">Results by precinct</h2></div>
+          <p>Click a row for details</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead id="results-head"></thead>
+            <tbody id="results-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+    </div>
+
+    <div id="compare-workspace" class="hidden">
+      <section class="compare-controls card">
+        <label>County
+          <select id="compare-county"><option>Loading…</option></select>
+        </label>
+        <fieldset>
+          <legend>Choice A</legend>
+          <label>Contest<select id="contest-a" disabled><option>Select a county</option></select></label>
+          <label>Candidate or option<select id="choice-a" disabled><option>Select a contest</option></select></label>
+        </fieldset>
+        <fieldset>
+          <legend>Choice B</legend>
+          <label>Contest<select id="contest-b" disabled><option>Select a county</option></select></label>
+          <label>Candidate or option<select id="choice-b" disabled><option>Select a contest</option></select></label>
+        </fieldset>
+      </section>
+
+      <section id="compare-empty" class="empty-state card">
+        <div class="seal">A×B</div>
+        <h2>Compare any two ballot choices</h2>
+        <p>Pick a candidate or proposition response for each side. The app compares their vote shares across the same precincts.</p>
+      </section>
+
+      <section id="compare-dashboard" class="dashboard hidden">
+        <div class="summary-grid compare-summary">
+          <article class="metric card"><p>Areas compared</p><strong id="compare-count">—</strong><small>With votes in both contests</small></article>
+          <article class="metric card"><p>Correlation</p><strong id="correlation">—</strong><small id="correlation-label">Relationship between vote shares</small></article>
+          <article class="metric card leader-card"><p>Above average on both</p><strong id="high-high-count">—</strong><small>Potential crossover areas</small></article>
+        </div>
+
+        <section class="compare-visuals">
+          <article id="map-card" class="visual-card card">
+            <div class="section-heading"><div><p class="eyebrow">Geographic pattern</p><h2 id="compare-map-heading">Precinct crossover map</h2></div><div id="compare-resolution" class="map-resolution hidden"><button id="compare-counties" class="active" type="button">Counties</button><button id="compare-precincts" type="button">Precincts</button></div></div>
+            <p id="compare-map-note" class="visual-note">Color shows whether each choice is above or below its countywide precinct average.</p>
+            <div id="map-legend" class="map-legend"></div>
+            <div id="comparison-map" class="leaflet-map" role="region" aria-label="Bivariate precinct comparison map"></div>
+          </article>
+          <article class="visual-card card">
+            <div class="section-heading"><div><p class="eyebrow">Relationship</p><h2>Vote-share comparison</h2></div></div>
+            <p id="scatter-note" class="visual-note">Each dot is a precinct. Dotted lines mark the countywide precinct averages.</p>
+            <svg id="comparison-scatter" viewBox="0 0 700 520" role="img" aria-label="Precinct vote-share scatterplot"></svg>
+          </article>
+        </section>
+
+        <section class="table-card card">
+          <div class="section-heading table-heading"><div><p class="eyebrow">Crossover finder</p><h2>Precinct comparison</h2></div><p>Sorted by combined support</p></div>
+          <div class="table-wrap"><table><thead id="compare-head"></thead><tbody id="compare-body"></tbody></table></div>
+        </section>
+      </section>
+    </div>
+
+    <div id="precinct-workspace" class="hidden">
+      <section class="precinct-controls card">
+        <label>County
+          <select id="precinct-county"><option>Loading…</option></select>
+        </label>
+        <p>Choose a county, then select a precinct directly on the map.</p>
+      </section>
+      <section id="precinct-empty" class="empty-state card">
+        <div class="seal">PCT</div>
+        <h2>Explore a precinct’s complete ballot</h2>
+        <p>Click a precinct to see every reported candidate race, proposition, and ballot question in that precinct.</p>
+      </section>
+      <section id="precinct-browser" class="precinct-browser hidden">
+        <article class="precinct-map-card card">
+          <div class="section-heading"><div><p class="eyebrow">Select a precinct</p><h2 id="precinct-map-title">Precinct map</h2></div></div>
+          <p class="visual-note">Click a boundary to load its complete results. The selected precinct is highlighted.</p>
+          <div id="precinct-map" class="leaflet-map precinct-leaflet-map" role="region" aria-label="Clickable precinct selection map"></div>
+        </article>
+        <section class="precinct-results">
+          <div id="precinct-prompt" class="empty-state card compact-empty"><h2>Select a precinct</h2><p>Results will appear here.</p></div>
+          <div id="precinct-profile" class="hidden" aria-live="polite">
+            <header class="precinct-profile-header card"><p class="eyebrow">Complete precinct results</p><h2 id="precinct-profile-name"></h2><p id="precinct-profile-summary"></p></header>
+            <div id="precinct-contests"></div>
+          </div>
+        </section>
+      </section>
+    </div>
+  </main>
+
+  <div id="map-tooltip" class="map-tooltip hidden" role="status"></div>
+
+  <aside id="detail-panel" class="detail-panel" aria-hidden="true">
+    <button id="close-panel" class="close-button" aria-label="Close">×</button>
+    <p class="eyebrow">Precinct profile</p>
+    <h2 id="detail-title">Precinct</h2>
+    <p id="detail-status" class="detail-status"></p>
+    <div id="detail-results" class="detail-results"></div>
+    <h3>Votes by method</h3>
+    <div id="method-results"></div>
+    <p class="footnote">Vote totals are candidate selections, not a measure of unique voters or turnout.</p>
+  </aside>
+  <div id="scrim" class="scrim"></div>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
