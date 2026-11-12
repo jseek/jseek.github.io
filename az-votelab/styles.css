@@ -26,6 +26,9 @@ main { width: min(1440px, 92vw); margin: -48px auto 80px; }
 .controls { padding: 18px; display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 14px; }
 .compare-controls { padding: 18px; display: grid; grid-template-columns: .7fr 1.65fr 1.65fr; align-items: stretch; gap: 14px; }
 .precinct-controls { padding: 18px; display: grid; grid-template-columns: minmax(220px, .45fr) 1fr; align-items: end; gap: 20px; }
+.patterns-controls { padding: 18px; display: grid; grid-template-columns: minmax(220px, .45fr) 1fr; align-items: center; gap: 20px; }
+.patterns-controls p { margin: 0; color: var(--muted); }
+.patterns-controls .control-title { margin-bottom: 2px; color: var(--ink); font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
 .precinct-controls p { margin: 0 0 10px; color: var(--muted); }
 .compare-controls fieldset { margin: 0; padding: 13px; display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px; border: 1px solid var(--line); border-radius: 9px; }
 .compare-controls legend { padding: 0 7px; color: var(--accent); font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
@@ -48,6 +51,23 @@ select:focus, input:focus { outline: 2px solid rgba(35,75,104,.2); border-color:
 #contest-map-card { margin-top: 16px; }
 .compare-visuals { margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .visual-card { min-width: 0; padding: 22px; }
+.patterns-section { margin-top: 16px; }
+.correlation-matrix { max-height: 720px; overflow: auto; border: 1px solid var(--line); border-radius: 9px; }
+.matrix-grid { display: grid; width: max-content; min-width: 100%; background: white; }
+.matrix-label { min-width: 150px; min-height: 44px; padding: 7px; display: grid; place-items: center start; position: sticky; left: 0; z-index: 2; background: #f8f5ee; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); font-size: 10px; font-weight: 750; line-height: 1.2; }
+.matrix-label.column { min-width: 58px; width: 58px; height: 150px; place-items: end center; position: sticky; top: 0; left: auto; z-index: 3; writing-mode: vertical-rl; transform: rotate(180deg); }
+.matrix-corner { position: sticky; top: 0; left: 0; z-index: 4; }
+.matrix-cell { width: 58px; height: 44px; display: grid; place-items: center; border: 0; border-right: 1px solid rgba(255,255,255,.45); border-bottom: 1px solid rgba(255,255,255,.45); border-radius: 0; color: #15283a; font-size: 10px; font-variant-numeric: tabular-nums; }
+.matrix-cell:hover { outline: 2px solid var(--ink); outline-offset: -2px; }
+.classification-list { display: grid; gap: 9px; max-height: 560px; overflow: auto; }
+.classification-item { padding: 12px; border: 1px solid var(--line); border-radius: 8px; }
+.classification-item header { display: flex; justify-content: space-between; gap: 10px; }
+.classification-item strong, .classification-item small { display: block; }
+.classification-item small { color: var(--muted); }
+.classification-item p { margin: 7px 0 0; font-size: 11px; color: var(--muted); }
+.classification-pill { padding: 3px 7px; color: white; background: var(--accent); border-radius: 99px; white-space: nowrap; font-size: 10px; font-weight: 800; }
+.classification-sources { padding-top: 7px; font-size: 11px; }
+.classification-sources a { color: var(--navy); }
 .visual-card h2 { margin-bottom: 0; font: 700 25px/1.2 Georgia,serif; }
 .visual-note { margin-bottom: 12px; color: var(--muted); font-size: 12px; }
 #comparison-scatter { width: 100%; height: auto; display: block; overflow: visible; }
@@ -135,7 +155,7 @@ tbody tr:hover { background: #faf3ec; }
 @media (max-width: 800px) {
   .masthead { min-height: 210px; padding-top: 36px; }
   .status-pill { display: none; }
-  .controls, .summary-grid, .compare-controls, .compare-visuals, .precinct-controls, .precinct-browser { grid-template-columns: 1fr; }
+  .controls, .summary-grid, .compare-controls, .compare-visuals, .precinct-controls, .precinct-browser, .patterns-controls { grid-template-columns: 1fr; }
   .precinct-map-card { position: static; }
   .leaflet-map, .precinct-leaflet-map { height: 480px; }
   .compare-controls fieldset { grid-template-columns: 1fr; }

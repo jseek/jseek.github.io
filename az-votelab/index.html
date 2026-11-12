@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AZ VoteLab</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
-  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./styles.css?v=20261111-patterns">
 </head>
 <body>
   <header class="masthead">
@@ -21,6 +21,7 @@
     <nav class="mode-switch card" aria-label="Analysis mode">
       <button id="explore-mode" class="active" type="button">Explore one contest</button>
       <button id="compare-mode" type="button">Compare two choices</button>
+      <button id="patterns-mode" type="button">Analyze patterns</button>
       <button id="precinct-mode" type="button">Explore by precinct</button>
     </nav>
 
@@ -131,6 +132,59 @@
       </section>
     </div>
 
+    <div id="patterns-workspace" class="hidden">
+      <section class="patterns-controls card">
+        <label>County
+          <select id="patterns-county"><option>Loading…</option></select>
+        </label>
+        <div><p class="control-title">Precinct-level analysis</p><p>Correlations and consistency describe area-level results, not how any individual voter completed a ballot.</p></div>
+      </section>
+
+      <section id="patterns-empty" class="empty-state card">
+        <div class="seal">R²</div>
+        <h2>Find coalitions, consistency, and crossover</h2>
+        <p>Choose a county to compare major-party candidates and classified ballot positions across its precincts.</p>
+      </section>
+
+      <section id="patterns-dashboard" class="dashboard hidden">
+        <div class="summary-grid">
+          <article class="metric card"><p>Precincts analyzed</p><strong id="patterns-count">—</strong><small>With comparable contests</small></article>
+          <article class="metric card"><p>Eligible choices</p><strong id="patterns-choice-count">—</strong><small>Major-party candidates and classified propositions</small></article>
+          <article class="metric card leader-card"><p>Largest divergence</p><strong id="patterns-largest">—</strong><small id="patterns-largest-label">From the precinct candidate baseline</small></article>
+        </div>
+
+        <section class="visual-card card patterns-section">
+          <div class="section-heading"><div><p class="eyebrow">Relationship atlas</p><h2>Vote-share correlation matrix</h2></div></div>
+          <p class="visual-note">Pearson correlation across precinct vote shares. Select a cell to open that pair in Compare two choices.</p>
+          <div id="correlation-matrix" class="correlation-matrix"></div>
+        </section>
+
+        <section class="compare-visuals">
+          <article class="visual-card card">
+            <div class="section-heading"><div><p class="eyebrow">Partisan consistency</p><h2>Precinct alignment map</h2></div></div>
+            <p class="visual-note">Color combines average right/left lean with how consistently contests landed on the same side of 50%.</p>
+            <div class="map-legend"><span class="legend-item"><span class="legend-swatch" style="background:#b84c35"></span>Consistent right</span><span class="legend-item"><span class="legend-swatch" style="background:#735b8c"></span>Mixed</span><span class="legend-item"><span class="legend-swatch" style="background:#33708e"></span>Consistent left</span></div>
+            <div id="patterns-map" class="leaflet-map" role="region" aria-label="Precinct partisan consistency map"></div>
+          </article>
+          <article class="visual-card card classification-card">
+            <div class="section-heading"><div><p class="eyebrow">Transparent methodology</p><h2>Proposition classifications</h2></div></div>
+            <p class="visual-note">Assignments are explicit and reviewable. “Right” and “left” refer to documented party positions, not objective qualities of a proposal.</p>
+            <div id="classification-list" class="classification-list"></div>
+          </article>
+        </section>
+
+        <section class="table-card card">
+          <div class="section-heading table-heading"><div><p class="eyebrow">Crossover and outlier finder</p><h2>Largest departures from candidate baseline</h2></div><p>Absolute percentage-point difference</p></div>
+          <div class="table-wrap"><table><thead><tr><th>Precinct</th><th>Contest / position</th><th>Candidate baseline</th><th>Choice share</th><th>Difference</th></tr></thead><tbody id="outlier-body"></tbody></table></div>
+        </section>
+
+        <section class="table-card card">
+          <div class="section-heading table-heading"><div><p class="eyebrow">Consistency detail</p><h2>Precinct partisan consistency</h2></div><p>Aggregate pattern, not individual straight-ticket voting</p></div>
+          <div class="table-wrap"><table><thead><tr><th>Precinct</th><th>Average right share</th><th>Average left share</th><th>Same-side contests</th><th>Classification</th></tr></thead><tbody id="consistency-body"></tbody></table></div>
+        </section>
+      </section>
+    </div>
+
     <div id="precinct-workspace" class="hidden">
       <section class="precinct-controls card">
         <label>County
@@ -174,6 +228,6 @@
   </aside>
   <div id="scrim" class="scrim"></div>
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
-  <script src="./app.js"></script>
+  <script src="./app.js?v=20261111-all-party-colors"></script>
 </body>
 </html>

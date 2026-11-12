@@ -1,0 +1,18 @@
+{
+  "version": "2026-11-11",
+  "methodology": "YES is classified as right-aligned and NO as left-aligned when the Arizona Republican Party supported the proposition and the Arizona Democratic Party opposed it. Candidate classifications use the party label in the election results. Green, No Labels, write-in, judicial retention, and unclassified choices are excluded from partisan baselines.",
+  "sources": [
+    {"label": "Arizona Secretary of State ballot measures", "url": "https://azsos.gov/elections/ballot-measures"},
+    {"label": "Documented state party positions", "url": "https://ballotpedia.org/State_Democratic_and_Republican_party_positions_on_ballot_measures,_2026"}
+  ],
+  "propositions": {
+    "PROPOSITION 141": {"topic": "Vehicle-mile taxes and monitoring", "rightChoice": "YES", "leftChoice": "NO", "confidence": "High", "rationale": "Republican-supported and Democratic-opposed legislatively referred measure."},
+    "PROPOSITION 142": {"topic": "Race-based preferences and DEI rules", "rightChoice": "YES", "leftChoice": "NO", "confidence": "High", "rationale": "Republican-supported and Democratic-opposed legislatively referred measure."},
+    "PROPOSITION 144": {"topic": "Voter identification and election requirements", "rightChoice": "YES", "leftChoice": "NO", "confidence": "High", "rationale": "Republican-supported and Democratic-opposed legislatively referred measure."},
+    "PROPOSITION 316": {"topic": "Local grocery-tax limits", "rightChoice": "YES", "leftChoice": "NO", "confidence": "High", "rationale": "Republican-supported and Democratic-opposed legislatively referred measure."},
+    "PROPOSITION 317": {"topic": "Drug cartels and homeland security", "rightChoice": "YES", "leftChoice": "NO", "confidence": "High", "rationale": "Republican-supported and Democratic-opposed legislatively referred measure."},
+    "PROPOSITION 318": {"topic": "Sex-based school athletics and private spaces", "rightChoice": "YES", "leftChoice": "NO", "confidence": "High", "rationale": "Republican-supported and Democratic-opposed legislatively referred measure."},
+    "PROPOSITION 319": {"topic": "Traffic photo-enforcement restrictions", "rightChoice": "YES", "leftChoice": "NO", "confidence": "High", "rationale": "Republican-supported and Democratic-opposed legislatively referred measure."},
+    "PROPOSITION 320": {"topic": "School direct-instruction spending requirement", "rightChoice": "YES", "leftChoice": "NO", "confidence": "High", "rationale": "Republican-supported and Democratic-opposed legislatively referred measure."}
+  }
+}
